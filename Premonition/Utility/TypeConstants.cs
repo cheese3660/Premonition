@@ -22,4 +22,5 @@ public static class TypeConstants
     public const string UInt16 = "System.UInt16";
     public const string Object = "System.Object";
     public const string String = "System.String";
+    public const string Void = "System.Void";
 }

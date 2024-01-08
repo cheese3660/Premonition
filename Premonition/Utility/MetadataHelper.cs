@@ -20,4 +20,14 @@ public static class MetadataHelper
         while (inherit && typeDefinition?.FullName != "System.Object");
         return customAttributes;
     }
+    
+    public static IEnumerable<CustomAttribute> GetCustomAttributes<T>(
+        MethodDefinition md)
+        where T : Attribute
+    {
+        var customAttributes = new List<CustomAttribute>();
+        var type = typeof (T);
+        customAttributes.AddRange(md!.CustomAttributes.Where<CustomAttribute>((Func<CustomAttribute, bool>) (ca => ca.AttributeType.FullName == type.FullName)));
+        return customAttributes;
+    }
 }
