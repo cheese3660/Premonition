@@ -1,3 +1,5 @@
 ﻿using PremonitionTester;
 
-Console.WriteLine($"Tests passed: {Tester.RunTests()}");
+var result = Tester.RunTests();
+
+Environment.Exit(result ? 0 : 1);

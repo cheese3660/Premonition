@@ -30,5 +30,5 @@ Process.Start("PremonitionInvoker.exe");
 
 // return TestRunner.RunTests() ? 0 : 1;
 
-// StaticTests.StaticVoidTestOne();
-// Console.WriteLine($"StaticVoidTestOneDummyValue = {StaticTests.StaticVoidTestOneDummyValue}");
+// StaticMethods.StaticVoidMethodOne();
+// Console.WriteLine($"StaticVoidMethodOneDummyValue = {StaticMethods.StaticVoidMethodOneDummyValue}");

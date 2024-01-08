@@ -11,7 +11,7 @@ public class PremonitionConstructor() : PremonitionMethod(MethodConstants.Constr
 {
     internal new static PremonitionConstructor? FromCecilMethod(MethodDefinition md)
     {
-        var attr = MetadataHelper.GetCustomAttributes<PremonitionConstructor>(md).FirstOrDefault();
+        var attr = CecilHelper.GetCustomAttributes<PremonitionConstructor>(md).FirstOrDefault();
         return attr == null ? null : new PremonitionConstructor();
     }
 }

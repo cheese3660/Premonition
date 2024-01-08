@@ -2,7 +2,7 @@
 
 namespace Premonition.Utility;
 
-public static class MetadataHelper
+public static class CecilHelper
 {
     public static IEnumerable<CustomAttribute> GetCustomAttributes<T>(
         TypeDefinition td,

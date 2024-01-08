@@ -12,7 +12,7 @@ public class PremonitionGetter(string property) : PremonitionMethod($"get_{prope
 
     internal new static PremonitionGetter? FromCecilMethod(MethodDefinition md)
     {
-        var attr = MetadataHelper.GetCustomAttributes<PremonitionGetter>(md).FirstOrDefault();
+        var attr = CecilHelper.GetCustomAttributes<PremonitionGetter>(md).FirstOrDefault();
         return attr == null ? null : new PremonitionGetter((string)attr.ConstructorArguments[0].Value);
     }
 }

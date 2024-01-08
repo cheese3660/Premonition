@@ -13,7 +13,7 @@ public class PremonitionMethod(string methodName) : Attribute
 
     internal static PremonitionMethod? FromCecilMethod(MethodDefinition md)
     {
-        var attr = MetadataHelper.GetCustomAttributes<PremonitionMethod>(md).FirstOrDefault();
+        var attr = CecilHelper.GetCustomAttributes<PremonitionMethod>(md).FirstOrDefault();
         return attr == null ? null : new PremonitionMethod((string)attr.ConstructorArguments[0].Value);
     }
 }

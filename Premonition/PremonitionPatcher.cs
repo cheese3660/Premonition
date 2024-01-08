@@ -248,7 +248,10 @@ internal class PremonitionPatcher(
     private static void PrefixPatchAlways(MethodDefinition methodBeingPatched, MethodReference patchMethodInModule,
         List<int> argumentIndices)
     {
-        
+        if (patchMethodInModule.Parameters.Count >= methodBeingPatched.Body.MaxStackSize)
+        {
+            methodBeingPatched.Body.MaxStackSize += patchMethodInModule.Parameters.Count;
+        }
         List<Instruction> prefixInstructions = [];
         foreach (var argumentIndex in argumentIndices)
         {
@@ -300,6 +303,10 @@ internal class PremonitionPatcher(
             methodBeingPatched.Body.Variables.Add(new VariableDefinition(methodBeingPatched.ReturnType));
             lastVariable = methodBeingPatched.Body.Variables.Last();
             lastIndex = methodBeingPatched.Body.Variables.Count - 1;
+        }
+        if (patchMethodInModule.Parameters.Count >= methodBeingPatched.Body.MaxStackSize)
+        {
+            methodBeingPatched.Body.MaxStackSize += patchMethodInModule.Parameters.Count;
         }
         List<Instruction> prefixInstructions = [];
         foreach (var argumentIndex in argumentIndices)
@@ -453,7 +460,11 @@ internal class PremonitionPatcher(
             }
         }
 
-
+        if (patchMethodInModule.Parameters.Count >= methodBeingPatched.Body.MaxStackSize)
+        {
+            methodBeingPatched.Body.MaxStackSize += patchMethodInModule.Parameters.Count;
+        }
+        
         List<Instruction> replacementInstructions = [];
         if (drop) replacementInstructions.Add(Instruction.Create(OpCodes.Pop));
         foreach (var argumentIndex in argumentIndices)
@@ -542,7 +553,11 @@ internal class PremonitionPatcher(
             }
             first = false;
         }
-
+        
+        if (patchMethodInModule.Parameters.Count >= methodBeingPatched.Body.MaxStackSize)
+        {
+            methodBeingPatched.Body.MaxStackSize += patchMethodInModule.Parameters.Count;
+        }
 
         List<Instruction> replacementInstructions = [];
         foreach (var argumentIndex in argumentIndices)
@@ -617,6 +632,11 @@ internal class PremonitionPatcher(
                     $"Error patching {methodBeingPatched.FullName} with {patchMethodInModule.FullName}, unknown argument: {argument.Name}");
                 return;
             }
+        }
+
+        if (patchMethodInModule.Parameters.Count >= methodBeingPatched.Body.MaxStackSize)
+        {
+            methodBeingPatched.Body.MaxStackSize += patchMethodInModule.Parameters.Count;
         }
         
         methodBeingPatched.Body.Instructions.Clear();
