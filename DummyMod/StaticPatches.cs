@@ -23,7 +23,7 @@ public class StaticPatches
     }
     
     [PremonitionMethod(nameof(StaticMethods.StaticVoidMethodThree))]
-    [PremonitionPrefix]
+    [PremonitionPostfix]
     public static void StaticVoidMethodThree()
     {
         StaticMethods.StaticVoidMethodThreeDummyValue *= 2;
