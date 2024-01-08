@@ -4,7 +4,7 @@ using JetBrains.Annotations;
 namespace DummyGame;
 
 [PublicAPI]
-public class StaticMethods
+public static class StaticMethods
 {
     public static int StaticVoidMethodOneDummyValue;
     
@@ -37,5 +37,34 @@ public class StaticMethods
     public static void StaticVoidMethodThree()
     {
         StaticVoidMethodThreeDummyValue *= 2;
+    }
+
+    public static int MultipleReturnDummyValue;
+    
+    
+    // The MultipleReturnDummyValue should be incremented by one if patched correctly
+    public static void MultipleReturn(int index)
+    {
+        switch (index)
+        {
+            case -1:
+                MultipleReturnDummyValue = 5;
+                break;
+            case 0:
+                MultipleReturnDummyValue = 10;
+                break;
+            case 1:
+                MultipleReturnDummyValue = 15;
+                break;
+            default:
+                return;
+        }
+    }
+    
+    
+    // Lets do a quick generic test, when patched correctly, this should always return the index + 1;
+    public static T Generic<T>(List<T> from, int index)
+    {
+        return from[index];
     }
 }

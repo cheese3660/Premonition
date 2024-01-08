@@ -6,7 +6,7 @@ namespace Premonition;
 internal class PremonitionManager
 {
 
-    private static readonly List<PremonitionPatcher> _premonitionPatchers = [];
+    internal readonly List<PremonitionPatcher> PremonitionPatchers = [];
     
     internal void ReadAssembly(string dllPath)
     {
@@ -95,7 +95,7 @@ internal class PremonitionManager
                 return;
             }
             
-            _premonitionPatchers.Add(new PremonitionPatcher(assemblyName,typeName,methodName!,argumentTypes,patchType!.Value,method));
+            PremonitionPatchers.Add(new PremonitionPatcher(assemblyName,typeName,methodName!,argumentTypes,patchType!.Value,method));
             
         } else if (hadPremonitionAttribute)
         {
@@ -222,9 +222,9 @@ internal class PremonitionManager
     internal void Patch(AssemblyDefinition definition)
     {
         List<int> toRemove = [];
-        for (var i = 0; i < _premonitionPatchers.Count; i++)
+        for (var i = 0; i < PremonitionPatchers.Count; i++)
         {
-            if (_premonitionPatchers[i].Patch(definition))
+            if (PremonitionPatchers[i].Patch(definition))
             {
                 toRemove.Add(i);
             }
@@ -233,7 +233,7 @@ internal class PremonitionManager
         toRemove.Reverse();
         foreach (var index in toRemove)
         {
-            _premonitionPatchers.RemoveAt(index);
+            PremonitionPatchers.RemoveAt(index);
         }
     }
 }

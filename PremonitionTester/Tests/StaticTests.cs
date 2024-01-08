@@ -30,4 +30,34 @@ public static class StaticTests
         Testing.Log("Testing that StaticVoidMethodThreeDummyValue is 16");
         Testing.AssertEqual(StaticMethods.StaticVoidMethodThreeDummyValue, 16);
     }
+
+    [Test("MultipleReturn() Postfix")]
+    public static void MultipleReturn()
+    {
+        Testing.Log("MultipleReturn(-1)");
+        StaticMethods.MultipleReturn(-1);
+        Testing.Log("Testing that MultipleReturnDummyValue is 6");
+        Testing.AssertEqual(StaticMethods.MultipleReturnDummyValue, 6);
+        Testing.Log("MultipleReturn(0)");
+        StaticMethods.MultipleReturn(0);
+        Testing.Log("Testing that MultipleReturnDummyValue is 11");
+        Testing.AssertEqual(StaticMethods.MultipleReturnDummyValue, 11);
+        Testing.Log("MultipleReturn(1)");
+        StaticMethods.MultipleReturn(1);
+        Testing.Log("Testing that MultipleReturnDummyValue is 16");
+        Testing.AssertEqual(StaticMethods.MultipleReturnDummyValue, 16);
+    }
+
+    [Test("Generic() Trampoline")]
+    public static void Generic()
+    {
+        Testing.Log("Testing that Generic([1,2,3],0) returns 2");
+        Testing.AssertEqual(StaticMethods.Generic([1, 2, 3], 0), 2);
+        Testing.Log("Testing that Generic([1,2,3],1) returns 3");
+        Testing.AssertEqual(StaticMethods.Generic([1, 2, 3], 1), 3);
+        Testing.Log("Testing that Generic([\"Hi\",\"Bye\",\"???\"],0) returns \"Bye\"");
+        Testing.AssertEqual(StaticMethods.Generic(["Hi","Bye","???"], 0), "Bye");
+        Testing.Log("Testing that Generic([\"Hi\",\"Bye\",\"???\"],1) returns \"???\"");
+        Testing.AssertEqual(StaticMethods.Generic(["Hi","Bye","???"], 1), "???");
+    }
 }

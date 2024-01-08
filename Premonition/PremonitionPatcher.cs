@@ -1,4 +1,5 @@
-﻿using Mono.Cecil;
+﻿using System.Reflection;
+using Mono.Cecil;
 using Mono.Cecil.Cil;
 using Mono.Cecil.Rocks;
 using Mono.Collections.Generic;
@@ -181,8 +182,10 @@ internal class PremonitionPatcher(
 
         var patchMethodInModule = Import(methodBeingPatched, patchMethod);
         if (patchMethodInModule == null) return;
-        foreach (var argument in patchMethodInModule.Parameters)
+        var argIndex = 0;
+        foreach (var argument in patchMethod.Parameters)
         {
+            var argumentInModule = patchMethodInModule.Parameters[argIndex];
             if (argument.Name == "__instance")
             {
                 argumentIndices.Add(0);
@@ -190,24 +193,24 @@ internal class PremonitionPatcher(
 
             if (argument.Name == "__retVal")
             {
-                if (!argument.IsOut)
+                if (!argumentInModule.IsOut)
                 {
                     Premonition.LogSource.LogError(
-                        $"Error patching {methodBeingPatched.FullName} with {patchMethodInModule.FullName}, __retVal must be an out parameter for prefix methods");
+                        $"Error patching {methodBeingPatched.FullName} with {patchMethod.FullName}, __retVal must be an out parameter for prefix methods");
                     return;
                 }
 
                 if (patchMethodInModule.ReturnType.FullName != TypeConstants.Boolean)
                 {
                     Premonition.LogSource.LogError(
-                        $"Error patching {methodBeingPatched.FullName} with {patchMethodInModule.FullName}, prefix methods with a __retVal parameter must return System.Boolean");
+                        $"Error patching {methodBeingPatched.FullName} with {patchMethod.FullName}, prefix methods with a __retVal parameter must return System.Boolean");
                     return;
                 }
 
-                if (methodBeingPatched.ReturnType.FullName == argument.ParameterType.FullName)
+                if (methodBeingPatched.ReturnType.FullName == argumentInModule.ParameterType.FullName)
                 {
                     Premonition.LogSource.LogError(
-                        $"Error patching {methodBeingPatched.FullName} with {patchMethodInModule.FullName}, __retVal much match the return type of the method being patched");
+                        $"Error patching {methodBeingPatched.FullName} with {patchMethod.FullName}, __retVal much match the return type of the method being patched");
                     return;
                     
                 }
@@ -228,6 +231,8 @@ internal class PremonitionPatcher(
                     $"Error patching {methodBeingPatched.FullName} with {patchMethod.FullName}, unknown argument: {argument.Name}");
                 return;
             }
+
+            argIndex++;
         }
 
         switch (patchMethodInModule.ReturnType.FullName)
@@ -387,7 +392,7 @@ internal class PremonitionPatcher(
         
         if (patchMethodInModule.ReturnType.FullName == TypeConstants.Void)
         {
-            PostfixPatchVoid(methodBeingPatched, patchMethodInModule);
+            PostfixPatchVoid(methodBeingPatched, patchMethodInModule,patchMethod);
         }
         else
         {
@@ -400,11 +405,11 @@ internal class PremonitionPatcher(
 
             if (patchMethodInModule.Parameters.Count == 0 || patchMethodInModule.Parameters[0].Name != "__retVal")
             {
-                PostfixPatchTailCall(methodBeingPatched, patchMethodInModule, true);
+                PostfixPatchTailCall(methodBeingPatched, patchMethodInModule,patchMethod,true);
             }
             else if (patchMethodInModule.Parameters[0].ParameterType.FullName == methodBeingPatched.ReturnType.FullName)
             {
-                PostfixPatchTailCall(methodBeingPatched, patchMethodInModule);
+                PostfixPatchTailCall(methodBeingPatched, patchMethodInModule,patchMethod);
             }
             else
             {
@@ -413,26 +418,148 @@ internal class PremonitionPatcher(
             }
         }
     }
+
+    private static void RetargetSwitch(Instruction inst, Instruction replace, Instruction target)
+    {
+        var operands = (Instruction[])inst.Operand;
+        foreach (var instruction in operands)
+        {
+            if (instruction.Operand == replace)
+            {
+                instruction.Operand = target;
+            }
+        }
+    }
     
-    private static IEnumerator<Instruction> ReplaceReturnInstructions(IEnumerable<Instruction> body,List<Instruction> replacement) {
+    private static Instruction RetargetBranch(Instruction branch, Instruction target, int sizeDifference)
+    {
+        if (branch.OpCode.OperandType is OperandType.ShortInlineBrTarget && sizeDifference >= 100)
+        {
+            switch (branch.OpCode.Code)
+            {
+                case Code.Br_S:
+                    return Instruction.Create(OpCodes.Br, target);
+                case Code.Brtrue_S:
+                    return Instruction.Create(OpCodes.Brtrue, target);
+                case Code.Brfalse_S:
+                    return Instruction.Create(OpCodes.Brfalse, target);
+                case Code.Bge_S:
+                    return Instruction.Create(OpCodes.Bge, target);
+                case Code.Bgt_S:
+                    return Instruction.Create(OpCodes.Bgt, target);
+                case Code.Ble_S:
+                    return Instruction.Create(OpCodes.Ble, target);
+                case Code.Blt_S:
+                    return Instruction.Create(OpCodes.Blt, target);
+                case Code.Beq_S:
+                    return Instruction.Create(OpCodes.Beq, target);
+                case Code.Bne_Un_S:
+                    return Instruction.Create(OpCodes.Bne_Un, target);
+                case Code.Bge_Un_S:
+                    return Instruction.Create(OpCodes.Bge_Un, target);
+                case Code.Bgt_Un_S:
+                    return Instruction.Create(OpCodes.Bgt_Un, target);
+                case Code.Ble_Un_S:
+                    return Instruction.Create(OpCodes.Ble_Un, target);
+                case Code.Blt_Un_S:
+                    return Instruction.Create(OpCodes.Blt_Un, target);
+                case Code.Leave_S:
+                    return Instruction.Create(OpCodes.Leave, target);
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+        branch.Operand = target;
+        return branch;
+    }
+
+
+    private static Instruction InstructionConstructor(OpCode code, object operand)
+    {
+        return (Instruction)Activator.CreateInstance(typeof(Instruction), BindingFlags.NonPublic | BindingFlags.Instance, null, [code, operand], null);
+    }
+    
+    private static IEnumerator<Instruction> ReplaceReturnInstructions(IEnumerable<Instruction> body,List<Instruction> replacement)
+    {
+        List<int> branches = [];
+        List<Instruction> switches = [];
+        List<Instruction> result = [];
+        var index = 0;
+        
         foreach (var instruction in body)
         {
-            if (instruction.OpCode != OpCodes.Ret) yield return instruction;
-            foreach (var replacementInstruction in replacement)
+            if (instruction.OpCode.FlowControl is FlowControl.Branch or FlowControl.Cond_Branch)
             {
-                yield return replacementInstruction;
+                if (instruction.OpCode == OpCodes.Switch)
+                {
+                    var targets = (instruction.Operand as Instruction[])!;
+                    if (targets.Any(target => target.OpCode == OpCodes.Ret))
+                    {
+                        switches.Add(instruction);
+                    }
+                }
+                else
+                {
+                    var target = (instruction.Operand as Instruction)!;
+                    if (target.OpCode == OpCodes.Ret)
+                    {
+                        branches.Add(index);
+                    }
+                }
             }
+            
+            if (instruction.OpCode != OpCodes.Ret)
+            {
+                result.Add(instruction);
+                index += 1;
+                continue;
+            }
+
+            var first = true;
+            foreach (var newInst in replacement.Select(replacementInstruction => InstructionConstructor(replacementInstruction.OpCode, replacementInstruction.Operand)))
+            {
+                if (first)
+                {
+                    foreach (var sw in switches)
+                    {
+                        RetargetSwitch(sw, instruction, newInst);
+                    }
+
+                    foreach (var idx in branches)
+                    {
+                        var branch = result[idx];
+                        if (branch.Operand != instruction) continue;
+                        var size = 0;
+                        for (var i = idx; i < index; i++)
+                        {
+                            size += result[i].GetSize();
+                        }
+                        result[idx] = RetargetBranch(branch, newInst, size);
+                    }
+                    first = false;
+                }
+                // this should be perfectly safe, but we need to clone the instruction, there should be no case where this is a branch instruction for example
+                result.Add(newInst);
+                index += 1;
+            }
+            result.Add(instruction);
+            index += 1;
+        }
+
+        foreach (var instruction in result)
+        {
             yield return instruction;
         }
     }
     
-    private static void PostfixPatchTailCall(MethodDefinition methodBeingPatched, MethodReference patchMethodInModule, bool drop=false)
+    private static void PostfixPatchTailCall(MethodDefinition methodBeingPatched, MethodReference patchMethodInModule, MethodReference patchMethod, bool drop=false)
     {
         
         // We already know with this one that the first argument should be the return value, so lets get every other argument
         List<int> argumentIndices = [];
 
-        foreach (var argument in patchMethodInModule.Parameters.Skip(1))
+        var argIndex = 0;
+        foreach (var argument in patchMethod.Parameters.Skip(1))
         {
             if (argument.Name == "__instance")
             {
@@ -440,7 +567,7 @@ internal class PremonitionPatcher(
             } else if (argument.Name == "__retVal")
             {
                 Premonition.LogSource.LogError(
-                    $"Error patching {methodBeingPatched.FullName} with {patchMethodInModule.FullName}, __retVal must be the first argument if it is used");
+                    $"Error patching {methodBeingPatched.FullName} with {patchMethod.FullName}, __retVal must be the first argument if it is used");
                 return;
             }
             else
@@ -455,9 +582,11 @@ internal class PremonitionPatcher(
                 }
                 if (found) continue;
                 Premonition.LogSource.LogError(
-                    $"Error patching {methodBeingPatched.FullName} with {patchMethodInModule.FullName}, unknown argument: {argument.Name}");
+                    $"Error patching {methodBeingPatched.FullName} with {patchMethod.FullName}, unknown argument: {argument.Name}");
                 return;
             }
+
+            argIndex++;
         }
 
         if (patchMethodInModule.Parameters.Count >= methodBeingPatched.Body.MaxStackSize)
@@ -506,13 +635,15 @@ internal class PremonitionPatcher(
             $"Successfully patched {methodBeingPatched.FullName} with {patchMethodInModule.FullName}");
     }
 
-    private static void PostfixPatchVoid(MethodDefinition methodBeingPatched, MethodReference patchMethodInModule)
+    private static void PostfixPatchVoid(MethodDefinition methodBeingPatched, MethodReference patchMethodInModule, MethodReference patchMethod)
     {
         
         List<int> argumentIndices = [];
         var first = true;
-        foreach (var argument in patchMethodInModule.Parameters)
+        var argIndex = 0;
+        foreach (var argument in patchMethod.Parameters)
         {
+            var inModuleArgument = patchMethodInModule.Parameters[argIndex];
             if (argument.Name == "__instance")
             {
                 argumentIndices.Add(0);
@@ -521,10 +652,10 @@ internal class PremonitionPatcher(
             {
                 if (first)
                 {
-                    if (argument.ParameterType.FullName != methodBeingPatched.ReturnType.FullName)
+                    if (inModuleArgument.ParameterType.FullName != methodBeingPatched.ReturnType.FullName)
                     {
                         Premonition.LogSource.LogError(
-                            $"Error patching {methodBeingPatched.FullName} with {patchMethodInModule.FullName}, type of __retVal argument does not match the return type of the method being patched");
+                            $"Error patching {methodBeingPatched.FullName} with {patchMethod.FullName}, type of __retVal argument does not match the return type of the method being patched");
                         return;
                     }
                     argumentIndices.Add(-1);
@@ -532,7 +663,7 @@ internal class PremonitionPatcher(
                 else
                 {
                     Premonition.LogSource.LogError(
-                        $"Error patching {methodBeingPatched.FullName} with {patchMethodInModule.FullName}, __retVal must be the first argument if it is used");
+                        $"Error patching {methodBeingPatched.FullName} with {patchMethod.FullName}, __retVal must be the first argument if it is used");
                     return;
                 }
             }
@@ -552,6 +683,7 @@ internal class PremonitionPatcher(
                 return;
             }
             first = false;
+            argIndex += 1;
         }
         
         if (patchMethodInModule.Parameters.Count >= methodBeingPatched.Body.MaxStackSize)
@@ -610,8 +742,8 @@ internal class PremonitionPatcher(
 
         var patchMethodInModule = Import(methodBeingPatched, patchMethod);
         if (patchMethodInModule == null) return;
-        
-        foreach (var argument in patchMethodInModule.Parameters)
+        var argIndex = 0;
+        foreach (var argument in patchMethod.Parameters)
         {
             if (argument.Name == "__instance")
             {
@@ -629,9 +761,10 @@ internal class PremonitionPatcher(
                 }
                 if (found) continue;
                 Premonition.LogSource.LogError(
-                    $"Error patching {methodBeingPatched.FullName} with {patchMethodInModule.FullName}, unknown argument: {argument.Name}");
+                    $"Error patching {methodBeingPatched.FullName} with {patchMethod.FullName}, unknown argument: {argument.Name}");
                 return;
             }
+            argIndex += 1;
         }
 
         if (patchMethodInModule.Parameters.Count >= methodBeingPatched.Body.MaxStackSize)

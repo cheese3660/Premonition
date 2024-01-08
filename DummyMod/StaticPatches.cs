@@ -28,4 +28,18 @@ public class StaticPatches
     {
         StaticMethods.StaticVoidMethodThreeDummyValue *= 2;
     }
+
+    [PremonitionMethod(nameof(StaticMethods.MultipleReturn))]
+    [PremonitionPostfix]
+    public static void MultipleReturn()
+    {
+        StaticMethods.MultipleReturnDummyValue += 1;
+    }
+    
+    [PremonitionMethod(nameof(StaticMethods.Generic))]
+    [PremonitionTrampoline]
+    public static T Generic<T>(List<T> from, int index)
+    {
+        return from[index + 1];
+    }
 }
