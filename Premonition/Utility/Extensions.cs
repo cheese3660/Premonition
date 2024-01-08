@@ -1,4 +1,5 @@
-﻿using Mono.Cecil;
+﻿using System.Text;
+using Mono.Cecil;
 
 namespace Premonition.Utility;
 
@@ -24,4 +25,33 @@ public static class Extensions
 
         return genericTypeRef;
     }
+    
+    public static string ToIlString(this MethodDefinition definition)
+    {
+        var sb = new StringBuilder();
+        if (definition.IsStatic) sb.Append("static ");
+        sb.Append(definition);
+        sb.Append(" [\n");
+        foreach (var variable in definition.Body.Variables)
+        {
+            sb.Append($"\t{variable}\n");
+        }
+        sb.Append("]\n{\n");
+        foreach (var instruction in definition.Body.Instructions)
+        {
+            sb.Append($"\t{instruction}\n");
+        }
+
+        sb.Append("}");
+        return sb.ToString();
+    }
+
+    public static void Dump(this MethodDefinition definition)
+    {
+        foreach (var line in definition.ToIlString().Split("\n"))
+        {
+            Premonition.LogSource.LogInfo(line);
+        }
+    }
+    
 }

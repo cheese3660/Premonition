@@ -12,7 +12,7 @@ public static class Premonition
     private static ConfigFile? _premonitionConfiguration;
 
     private static ManualLogSource? _logSource;
-    internal static ManualLogSource LogSource => _logSource ??= new ManualLogSource("Premonition");
+    internal static ManualLogSource LogSource => _logSource ??= Logger.CreateLogSource("Premonition");
     
     private static ConfigFile PremonitionConfiguration => _premonitionConfiguration ??=
         new ConfigFile(BepInEx.Paths.ConfigPath + "/premonition.cfg", true);

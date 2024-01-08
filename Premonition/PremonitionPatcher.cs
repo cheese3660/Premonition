@@ -25,7 +25,7 @@ internal class PremonitionPatcher(
     /// <returns>If this patcher has completed its purpose (successfully or not)</returns>
     internal bool Patch(AssemblyDefinition definition)
     {
-        if (definition.FullName != assembly) return false;
+        if (definition.Name.Name != assembly) return false;
         var type = definition.Modules.SelectMany(x => x.GetTypes())
             .FirstOrDefault(x => x.FullName == typeName);
         if (type == null)
@@ -648,7 +648,9 @@ internal class PremonitionPatcher(
 
         methodBeingPatched.Body.Instructions.Add(Instruction.Create(OpCodes.Call, patchMethodInModule));
         methodBeingPatched.Body.Instructions.Add(Instruction.Create(OpCodes.Ret));
-
+        
+        // methodBeingPatched.Dump();
+        
         Premonition.LogSource.LogInfo(
             $"Successfully patched {methodBeingPatched.FullName} with {patchMethod.FullName}");
     }
