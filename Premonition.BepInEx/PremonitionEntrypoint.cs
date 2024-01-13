@@ -1,17 +1,20 @@
 ﻿using System;
+using System.Reflection;
 using JetBrains.Annotations;
 using Mono.Cecil;
 using BepInEx.Configuration;
 using BepInEx.Logging;
-using Premonition.Core;
-using Premonition.Core.Utility;
-using ILogListener = Premonition.Core.Utility.ILogListener;
 
 namespace Premonition.BepInEx;
 
 [UsedImplicitly]
 public static class PremonitionEntrypoint
 {
+    static PremonitionEntrypoint()
+    {
+        Assembly.LoadFile($"{new FileInfo(typeof(PremonitionEntrypoint).Assembly.Location).Directory!.FullName}\\Premonition.dll");
+    }
+    
     private static ConfigFile? _premonitionConfiguration;
 
     private static ManualLogSource? _logSource;
@@ -22,7 +25,7 @@ public static class PremonitionEntrypoint
 
     private static ConfigEntry<List<string>>? _modPaths;
 
-    private static ConfigEntry<List<string>> ModPaths => _modPaths ??= PremonitionConfiguration.Bind("Runtime",
+    internal static ConfigEntry<List<string>> ModPaths => _modPaths ??= PremonitionConfiguration.Bind("Runtime",
         "Runtime DLL folders", new List<string> {global::BepInEx.Paths.PluginPath});
 
     private static ConfigEntry<bool>? _respectDisabledModsList;
@@ -30,26 +33,10 @@ public static class PremonitionEntrypoint
     private static ConfigEntry<bool> RespectDisabledModsList => _respectDisabledModsList ??=
         PremonitionConfiguration.Bind("Preload", "Respect Disabled Mods List (When SpaceWarp is installed)", true);
 
-    private static PremonitionManager? _manager;
-    private static PremonitionManager Manager => _manager ??= new PremonitionManager();
-    
-    private static void RegisterRuntimePremonition()
-    {
-        Logging.Listeners.Add(ILogListener.CreateListener(LogSource.LogDebug, LogSource.LogInfo, LogSource.LogWarning,
-            LogSource.LogError));
-        _targetDLLs = [];
-        var searchPaths = ModPaths.Value!;
-        foreach (var dll in searchPaths.Where(Directory.Exists).SelectMany(folder => Directory.EnumerateFiles(folder,"*.dll",SearchOption.AllDirectories)))
-        {
-            Manager.ReadAssembly(dll);
-        }
+    private static BepInExPremonitionManager? _bepInExPremonitionManager;
 
-        foreach (var patcher in Manager.PremonitionPatchers.Select(x => x.Assembly + ".dll"))
-        {
-            _targetDLLs.Add(patcher);
-        }
-    }
-    
+    private static BepInExPremonitionManager BepInExPremonitionManager =>
+        _bepInExPremonitionManager ??= new BepInExPremonitionManager();
     
     // ReSharper disable once InconsistentNaming
     private static HashSet<string>? _targetDLLs;
@@ -62,7 +49,8 @@ public static class PremonitionEntrypoint
         {
             if (_targetDLLs == null)
             {
-                RegisterRuntimePremonition();
+                BepInExPremonitionManager.RegisterRuntimePremonition();
+                _targetDLLs = BepInExPremonitionManager.TargetDLLs;
             }
 
             return _targetDLLs!;
@@ -72,6 +60,6 @@ public static class PremonitionEntrypoint
     [UsedImplicitly]
     public static void Patch(ref AssemblyDefinition definition)
     {
-        Manager.Patch(definition);
+        BepInExPremonitionManager.Patch(definition);
     }
 }

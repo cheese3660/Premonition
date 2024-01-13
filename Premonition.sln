@@ -14,6 +14,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PremonitionTester", "Premon
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Premonition.BepInEx", "Premonition.BepInEx\Premonition.BepInEx.csproj", "{3CDC0481-5C99-4946-A9EF-CBCB14BEDEB7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Premonition.SpaceWarp", "Premonition.SpaceWarp\Premonition.SpaceWarp.csproj", "{4BE04748-EC56-44A0-B036-02DDC8173BBD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -48,5 +50,9 @@ Global
 		{3CDC0481-5C99-4946-A9EF-CBCB14BEDEB7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3CDC0481-5C99-4946-A9EF-CBCB14BEDEB7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3CDC0481-5C99-4946-A9EF-CBCB14BEDEB7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4BE04748-EC56-44A0-B036-02DDC8173BBD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4BE04748-EC56-44A0-B036-02DDC8173BBD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4BE04748-EC56-44A0-B036-02DDC8173BBD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4BE04748-EC56-44A0-B036-02DDC8173BBD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
