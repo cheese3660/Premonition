@@ -1,4 +1,4 @@
-﻿namespace Premonition.Utility;
+﻿namespace Premonition.Core.Utility;
 
 public static class MethodConstants
 {

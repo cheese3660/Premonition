@@ -1,14 +1,14 @@
 ﻿using Mono.Cecil;
-using Premonition.Attributes;
+using Premonition.Core.Attributes;
 
-namespace Premonition;
+namespace Premonition.Core;
 
-internal class PremonitionManager
+public class PremonitionManager
 {
-
-    internal readonly List<PremonitionPatcher> PremonitionPatchers = [];
     
-    internal void ReadAssembly(string dllPath)
+    public readonly List<PremonitionPatcher> PremonitionPatchers = [];
+    
+    public void ReadAssembly(string dllPath)
     {
         var assemblyDefinition = AssemblyDefinition.ReadAssembly(dllPath);
         RegisterAssembly(assemblyDefinition);
@@ -53,7 +53,7 @@ internal class PremonitionManager
             hadPremonitionAttribute = true;
             if (!string.IsNullOrEmpty(assemblyName))
             {
-                Premonition.LogSource.LogError(
+                LogError(
                     $"Assembly name for patch method {method.FullName} is overqualified, this method will not be used");
                 return;
             }
@@ -65,7 +65,7 @@ internal class PremonitionManager
             hadPremonitionAttribute = true;
             if (!string.IsNullOrEmpty(typeName))
             {
-                Premonition.LogSource.LogError(
+                LogError(
                     $"Type name for patch method {method.FullName} is overqualified, this method will not be used");
                 return;
             }
@@ -90,7 +90,7 @@ internal class PremonitionManager
             
             if (hadPremonitionAttribute && missingAttributes.Count > 0)
             {
-                Premonition.LogSource.LogError(
+                LogError(
                     $"Patch method {method.FullName} is missing the following necessary attributes: {string.Join(", ", missingAttributes)}, this method will not be used");
                 return;
             }
@@ -99,7 +99,7 @@ internal class PremonitionManager
             
         } else if (hadPremonitionAttribute)
         {
-            Premonition.LogSource.LogError(
+            LogError(
                 $"Patch method {method.FullName} or type {method.DeclaringType.FullName} is missing a {(typeName == null ? "PremonitionType" : "PremonitionAssembly")} attribute, this method will not be used");
         }
     }
@@ -119,7 +119,7 @@ internal class PremonitionManager
         {
             if (patchType.HasValue)
             {
-                Premonition.LogSource.LogError(
+                LogError(
                     $"Patch type for patch method {method.FullName} is overqualified, this method will not be used");
                 return null;
             }
@@ -129,7 +129,7 @@ internal class PremonitionManager
         {
             if (patchType.HasValue)
             {
-                Premonition.LogSource.LogError(
+                LogError(
                     $"Patch type for patch method {method.FullName} is overqualified, this method will not be used");
                 return null;
             }
@@ -151,7 +151,7 @@ internal class PremonitionManager
         {
             if (!string.IsNullOrEmpty(methodName))
             {
-                Premonition.LogSource.LogError(
+                LogError(
                     $"Method name for patch method {method.FullName} is overqualified, this method will not be used");
                 return null;
             }
@@ -162,7 +162,7 @@ internal class PremonitionManager
         {
             if (!string.IsNullOrEmpty(methodName))
             {
-                Premonition.LogSource.LogError(
+                LogError(
                     $"Method name for patch method {method.FullName} is overqualified, this method will not be used");
                 return null;
             }
@@ -173,7 +173,7 @@ internal class PremonitionManager
         {
             if (!string.IsNullOrEmpty(methodName))
             {
-                Premonition.LogSource.LogError(
+                LogError(
                     $"Method name for patch method {method.FullName} is overqualified, this method will not be used");
                 return null;
             }
@@ -184,7 +184,7 @@ internal class PremonitionManager
         {
             if (!string.IsNullOrEmpty(methodName))
             {
-                Premonition.LogSource.LogError(
+                LogError(
                     $"Method name for patch method {method.FullName} is overqualified, this method will not be used");
                 return null;
             }
@@ -195,7 +195,7 @@ internal class PremonitionManager
         {
             if (!string.IsNullOrEmpty(methodName))
             {
-                Premonition.LogSource.LogError(
+                LogError(
                     $"Method name for patch method {method.FullName} is overqualified, this method will not be used");
                 return null;
             }
@@ -206,7 +206,7 @@ internal class PremonitionManager
         {
             if (!string.IsNullOrEmpty(methodName))
             {
-                Premonition.LogSource.LogError(
+                LogError(
                     $"Method name for patch method {method.FullName} is overqualified, this method will not be used");
                 return null;
             }
@@ -219,7 +219,7 @@ internal class PremonitionManager
     }
 
 
-    internal void Patch(AssemblyDefinition definition)
+    public void Patch(AssemblyDefinition definition)
     {
         List<int> toRemove = [];
         for (var i = 0; i < PremonitionPatchers.Count; i++)

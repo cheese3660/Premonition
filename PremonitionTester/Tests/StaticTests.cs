@@ -8,7 +8,7 @@ namespace PremonitionTester.Tests;
 public static class StaticTests
 {
     [Test("StaticVoidMethodOne() Trampoline")]
-    public static void StaticVoidMethodOneTest()
+    public static void StaticVoidMethodOne()
     {
         StaticMethods.StaticVoidMethodOne();
         Testing.Log("Testing that StaticVoidMethodOneDummyValue is 2");
@@ -16,7 +16,7 @@ public static class StaticTests
     }
 
     [Test("StaticVoidMethodTwo() Prefix")]
-    public static void StaticVoidMethodTwoTest()
+    public static void StaticVoidMethodTwo()
     {
         StaticMethods.StaticVoidMethodTwo();
         Testing.Log("Testing that StaticVoidMethodTwoDummyValue is 10");
@@ -59,5 +59,36 @@ public static class StaticTests
         Testing.AssertEqual(StaticMethods.Generic(["Hi","Bye","???"], 0), "Bye");
         Testing.Log("Testing that Generic([\"Hi\",\"Bye\",\"???\"],1) returns \"???\"");
         Testing.AssertEqual(StaticMethods.Generic(["Hi","Bye","???"], 1), "???");
+        Testing.Log("Testing that Generic([(0,1,2),(3,4,5),(6,7,8)],0) returns (3,4,5)");
+        Testing.AssertEqual(StaticMethods.Generic([(0,1,2),(3,4,5),(6,7,8)],0),(3,4,5));
+        Testing.Log("Testing that Generic([(0,1,2),(3,4,5),(6,7,8)],1) returns (6,7,8)");
+        Testing.AssertEqual(StaticMethods.Generic([(0,1,2),(3,4,5),(6,7,8)],1),(6,7,8));
+    }
+
+    [Test("GenericValue() Trampoline")]
+    public static void GenericValue()
+    {
+        Testing.Log("Testing that GenericValue(0) returns 0");
+        Testing.AssertEqual(StaticMethods.GenericValue(0),0);
+        Testing.Log("Testing that GenericValue((0,1,2)) returns (0,1,2)");
+        Testing.AssertEqual(StaticMethods.GenericValue((0,1,2)),(0,1,2));
+    }
+
+    [Test("ReturnsDoubleInput() Postfix")]
+    public static void ReturnsDoubleInput()
+    {
+        Testing.Log("Testing that ReturnsDoubleInput(2) returns 8");
+        Testing.AssertEqual(StaticMethods.ReturnsDoubleInput(2), 8);
+        Testing.Log("Testing that ReturnsDoubleInput(4) returns 16");
+        Testing.AssertEqual(StaticMethods.ReturnsDoubleInput(4), 16);
+    }
+    
+    [Test("ReturnsTripleInput() Prefix")]
+    public static void ReturnsTripleInput()
+    {
+        Testing.Log("Testing that ReturnsTripleInput(2) returns 0");
+        Testing.AssertEqual(StaticMethods.ReturnsTripleInput(2), 0);
+        Testing.Log("Testing that ReturnsTripleInput(4) returns 12");
+        Testing.AssertEqual(StaticMethods.ReturnsTripleInput(4), 12);
     }
 }

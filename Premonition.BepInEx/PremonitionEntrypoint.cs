@@ -3,24 +3,27 @@ using JetBrains.Annotations;
 using Mono.Cecil;
 using BepInEx.Configuration;
 using BepInEx.Logging;
+using Premonition.Core;
+using Premonition.Core.Utility;
+using ILogListener = Premonition.Core.Utility.ILogListener;
 
-namespace Premonition;
+namespace Premonition.BepInEx;
 
 [UsedImplicitly]
-public static class Premonition
+public static class PremonitionEntrypoint
 {
     private static ConfigFile? _premonitionConfiguration;
 
     private static ManualLogSource? _logSource;
-    internal static ManualLogSource LogSource => _logSource ??= Logger.CreateLogSource("Premonition");
+    internal static ManualLogSource LogSource => _logSource ??= Logger.CreateLogSource("Premonition.BepInEx");
     
     private static ConfigFile PremonitionConfiguration => _premonitionConfiguration ??=
-        new ConfigFile(BepInEx.Paths.ConfigPath + "/premonition.cfg", true);
+        new ConfigFile(global::BepInEx.Paths.ConfigPath + "/premonition.cfg", true);
 
     private static ConfigEntry<List<string>>? _modPaths;
 
     private static ConfigEntry<List<string>> ModPaths => _modPaths ??= PremonitionConfiguration.Bind("Runtime",
-        "Runtime DLL folders", new List<string> {BepInEx.Paths.PluginPath, BepInEx.Paths.GameRootPath + "/GameData/Mods"});
+        "Runtime DLL folders", new List<string> {global::BepInEx.Paths.PluginPath});
 
     private static ConfigEntry<bool>? _respectDisabledModsList;
 
@@ -32,6 +35,8 @@ public static class Premonition
     
     private static void RegisterRuntimePremonition()
     {
+        Logging.Listeners.Add(ILogListener.CreateListener(LogSource.LogDebug, LogSource.LogInfo, LogSource.LogWarning,
+            LogSource.LogError));
         _targetDLLs = [];
         var searchPaths = ModPaths.Value!;
         foreach (var dll in searchPaths.Where(Directory.Exists).SelectMany(folder => Directory.EnumerateFiles(folder,"*.dll",SearchOption.AllDirectories)))

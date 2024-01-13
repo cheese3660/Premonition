@@ -1,6 +1,6 @@
 ﻿using Mono.Cecil;
 
-namespace Premonition.Utility;
+namespace Premonition.Core.Utility;
 
 public static class CecilHelper
 {

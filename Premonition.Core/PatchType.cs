@@ -1,4 +1,4 @@
-﻿namespace Premonition;
+﻿namespace Premonition.Core;
 
 public enum PatchType
 {

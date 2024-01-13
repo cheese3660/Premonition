@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Premonition", "Premonition\Premonition.csproj", "{0BB3077A-1EF3-49B6-AFCD-8A3BA0F85545}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Premonition.Core", "Premonition.Core\Premonition.Core.csproj", "{0BB3077A-1EF3-49B6-AFCD-8A3BA0F85545}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PremonitionPreTester", "PremonitionPreTester\PremonitionPreTester.csproj", "{6544EC74-D82E-4497-904D-D1F3C4E49079}"
 EndProject
@@ -11,6 +11,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PremonitionInvoker", "PremonitionInvoker\PremonitionInvoker.csproj", "{F3B4C277-C256-49C4-A972-48334007BC9D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PremonitionTester", "PremonitionTester\PremonitionTester.csproj", "{DD12A6DD-1EAB-4EE5-B603-A56322C7BD79}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Premonition.BepInEx", "Premonition.BepInEx\Premonition.BepInEx.csproj", "{3CDC0481-5C99-4946-A9EF-CBCB14BEDEB7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -42,5 +44,9 @@ Global
 		{DD12A6DD-1EAB-4EE5-B603-A56322C7BD79}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DD12A6DD-1EAB-4EE5-B603-A56322C7BD79}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DD12A6DD-1EAB-4EE5-B603-A56322C7BD79}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3CDC0481-5C99-4946-A9EF-CBCB14BEDEB7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3CDC0481-5C99-4946-A9EF-CBCB14BEDEB7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3CDC0481-5C99-4946-A9EF-CBCB14BEDEB7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3CDC0481-5C99-4946-A9EF-CBCB14BEDEB7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

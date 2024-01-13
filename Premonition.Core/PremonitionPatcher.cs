@@ -4,12 +4,12 @@ using Mono.Cecil.Cil;
 using Mono.Cecil.Rocks;
 using Mono.Collections.Generic;
 using MonoMod.Utils;
-using Premonition.Utility;
-using static Premonition.Utility.Extensions;
+using Premonition.Core.Utility;
+using static Premonition.Core.Utility.Extensions;
 
-namespace Premonition;
+namespace Premonition.Core;
 
-internal class PremonitionPatcher(
+public class PremonitionPatcher(
     string assembly,
     string typeName,
     string methodName,
@@ -17,21 +17,21 @@ internal class PremonitionPatcher(
     PatchType patchType,
     MethodReference patchMethod)
 {
-    internal string Assembly => assembly;
+    public string Assembly => assembly;
 
     /// <summary>
     /// Patches the method in the target assembly
     /// </summary>
     /// <param name="definition">The assembly being referred to</param>
     /// <returns>If this patcher has completed its purpose (successfully or not)</returns>
-    internal bool Patch(AssemblyDefinition definition)
+    public bool Patch(AssemblyDefinition definition)
     {
         if (definition.Name.Name != assembly) return false;
         var type = definition.Modules.SelectMany(x => x.GetTypes())
             .FirstOrDefault(x => x.FullName == typeName);
         if (type == null)
         {
-            Premonition.LogSource.LogError(
+            LogError(
                 $"Error patching {assembly}:{typeName}:{methodName} with method {patchMethod.FullName}, type does not exist!");
             return true;
         }
@@ -39,7 +39,7 @@ internal class PremonitionPatcher(
         var possibleMethods = type.GetMethods().Where(method => method.Name == methodName).ToList();
         if (possibleMethods.Count == 0)
         {
-            Premonition.LogSource.LogError(
+            LogError(
                 $"Error patching {assembly}:{typeName}:{methodName} with method {patchMethod.FullName}, method does not exist!");
             return true;
         }
@@ -52,7 +52,7 @@ internal class PremonitionPatcher(
                     .ToList();
             if (possibleMethods.Count == 0)
             {
-                Premonition.LogSource.LogError(
+                LogError(
                     $"Error patching {assembly}:{typeName}:{methodName} with method {patchMethod.FullName}, method overload does not exist with specified arguments!");
                 return true;
             }
@@ -77,18 +77,18 @@ internal class PremonitionPatcher(
 
             if (selectedMethods.Count == 0)
             {
-                Premonition.LogSource.LogError(
+                LogError(
                     $"Error patching {assembly}:{typeName}:{methodName} with method {patchMethod.FullName}, method overload does not exist with specified arguments!");
                 return true;
             }
 
             if (selectedMethods.Count > 1)
             {
-                Premonition.LogSource.LogError(
+                LogError(
                     $"Error patching {assembly}:{typeName}:{methodName} with method {patchMethod.FullName}, ambiguous method reference! (Possible methods are as follows)");
                 foreach (var selectedMethod in selectedMethods)
                 {
-                    Premonition.LogSource.LogInfo(
+                    LogInfo(
                         $"{selectedMethod.FullName}{(selectedMethod.GenericParameters.Count > 0 ? $"<{string.Join(", ", selectedMethod.GenericParameters.Select(x => x.FullName))}>" : "")}({string.Join(", ", selectedMethod.Parameters.Select(x => x.ParameterType.FullName))})");
                 }
 
@@ -101,11 +101,11 @@ internal class PremonitionPatcher(
         {
             if (possibleMethods.Count > 1)
             {
-                Premonition.LogSource.LogError(
+                LogError(
                     $"Error patching {assembly}:{typeName}:{methodName} with method {patchMethod.FullName}, ambiguous method reference! (Possible methods are as follows)");
                 foreach (var possibleMethod in possibleMethods)
                 {
-                    Premonition.LogSource.LogInfo(
+                    LogInfo(
                         $"{possibleMethod.FullName}{(possibleMethod.GenericParameters.Count > 0 ? $"<{string.Join(", ", possibleMethod.GenericParameters.Select(x => x.FullName))}>" : "")}({string.Join(", ", possibleMethod.Parameters.Select(x => x.ParameterType.FullName))})");
                 }
 
@@ -133,7 +133,7 @@ internal class PremonitionPatcher(
                 TrampolinePatch(methodBeingPatched, patchMethod);
                 break;
             default:
-                Premonition.LogSource.LogError(
+                LogError(
                     $"Error patching {methodBeingPatched.FullName} with {patchMethod.FullName}, invalid patch type: {type}");
                 break;
         }
@@ -147,13 +147,13 @@ internal class PremonitionPatcher(
         {
             if (!patchMethod.HasGenericParameters)
             {
-                Premonition.LogSource.LogError($"Error patching {methodBeingPatched.FullName} with {patchMethod.FullName}, the method being patched has generic parameters while the patch method does not");
+                LogError($"Error patching {methodBeingPatched.FullName} with {patchMethod.FullName}, the method being patched has generic parameters while the patch method does not");
                 return null;
             }
 
             if (patchMethod.GenericParameters.Count != methodBeingPatched.GenericParameters.Count)
             {
-                Premonition.LogSource.LogError(
+                LogError(
                     $"Error patching {methodBeingPatched.FullName} with {patchMethod.FullName}, mismatched amount of generic parameters");
                 return null;
             }
@@ -164,13 +164,13 @@ internal class PremonitionPatcher(
             }
             catch (Exception e)
             {
-                Premonition.LogSource.LogError(
+                LogError(
                     $"Error patching {methodBeingPatched.FullName} with {patchMethod.FullName}, mismatched amount of generic {e}");
                 return null;
             }
         } else if (patchMethod.HasGenericParameters)
         {
-            Premonition.LogSource.LogError($"Error patching {methodBeingPatched.FullName} with {patchMethod.FullName}, the patch method has generic parameters while the method being patched does not");
+            LogError($"Error patching {methodBeingPatched.FullName} with {patchMethod.FullName}, the patch method has generic parameters while the method being patched does not");
             return null;
         }
         return patchMethodInModule;
@@ -193,23 +193,23 @@ internal class PremonitionPatcher(
 
             if (argument.Name == "__retVal")
             {
-                if (!argumentInModule.IsOut)
+                if (!argument.IsOut)
                 {
-                    Premonition.LogSource.LogError(
+                    LogError(
                         $"Error patching {methodBeingPatched.FullName} with {patchMethod.FullName}, __retVal must be an out parameter for prefix methods");
                     return;
                 }
 
                 if (patchMethodInModule.ReturnType.FullName != TypeConstants.Boolean)
                 {
-                    Premonition.LogSource.LogError(
+                    LogError(
                         $"Error patching {methodBeingPatched.FullName} with {patchMethod.FullName}, prefix methods with a __retVal parameter must return System.Boolean");
                     return;
                 }
 
-                if (methodBeingPatched.ReturnType.FullName == argumentInModule.ParameterType.FullName)
+                if (methodBeingPatched.ReturnType.FullName != argumentInModule.ParameterType.FullName)
                 {
-                    Premonition.LogSource.LogError(
+                    LogError(
                         $"Error patching {methodBeingPatched.FullName} with {patchMethod.FullName}, __retVal much match the return type of the method being patched");
                     return;
                     
@@ -227,7 +227,7 @@ internal class PremonitionPatcher(
                     break;
                 }
                 if (found) continue;
-                Premonition.LogSource.LogError(
+                LogError(
                     $"Error patching {methodBeingPatched.FullName} with {patchMethod.FullName}, unknown argument: {argument.Name}");
                 return;
             }
@@ -244,7 +244,7 @@ internal class PremonitionPatcher(
                 PrefixPatchAlways(methodBeingPatched,patchMethodInModule,argumentIndices);
                 break;
             default:
-                Premonition.LogSource.LogError(
+                LogError(
                     $"Error patching {methodBeingPatched.FullName} with {patchMethod.FullName}, invalid return type: {patchMethodInModule.ReturnType.FullName}, expected System.Boolean or System.Void");
                 break;
         }
@@ -287,7 +287,7 @@ internal class PremonitionPatcher(
         prefixInstructions.Add(Instruction.Create(OpCodes.Call, patchMethodInModule));
         
         methodBeingPatched.Body.Instructions.InsertRange(0, prefixInstructions);
-        Premonition.LogSource.LogInfo(
+        LogInfo(
             $"Successfully patched {methodBeingPatched.FullName} with {patchMethodInModule.FullName}");
     }
 
@@ -300,7 +300,7 @@ internal class PremonitionPatcher(
         {
             if (argumentIndices.All(x => x != -1))
             {
-                Premonition.LogSource.LogError(
+                LogError(
                     $"Error patching {methodBeingPatched.FullName} with {patchMethodInModule.FullName}, a __retVal out parameter is required for conditional prefix patches on methods with return types other than System.Void");
                 return;
             }
@@ -381,7 +381,7 @@ internal class PremonitionPatcher(
         }
         
         methodBeingPatched.Body.Instructions.InsertRange(0, prefixInstructions);
-        Premonition.LogSource.LogInfo(
+        LogInfo(
             $"Successfully patched {methodBeingPatched.FullName} with {patchMethodInModule.FullName}");
     }
     
@@ -398,12 +398,12 @@ internal class PremonitionPatcher(
         {
             if (patchMethodInModule.ReturnType.FullName != methodBeingPatched.ReturnType.FullName)
             {
-                Premonition.LogSource.LogError(
+                LogError(
                     $"Error patching {methodBeingPatched.FullName} with {patchMethodInModule.FullName}, mismatched return types");
                 return;
             }
 
-            if (patchMethodInModule.Parameters.Count == 0 || patchMethodInModule.Parameters[0].Name != "__retVal")
+            if (patchMethod.Parameters.Count == 0 || patchMethod.Parameters[0].Name != "__retVal")
             {
                 PostfixPatchTailCall(methodBeingPatched, patchMethodInModule,patchMethod,true);
             }
@@ -413,7 +413,7 @@ internal class PremonitionPatcher(
             }
             else
             {
-                Premonition.LogSource.LogError(
+                LogError(
                     $"Error patching {methodBeingPatched.FullName} with {patchMethodInModule.FullName}, type of __retVal argument does not match the return type of the method being patched");
             }
         }
@@ -566,7 +566,7 @@ internal class PremonitionPatcher(
                 argumentIndices.Add(0);
             } else if (argument.Name == "__retVal")
             {
-                Premonition.LogSource.LogError(
+                LogError(
                     $"Error patching {methodBeingPatched.FullName} with {patchMethod.FullName}, __retVal must be the first argument if it is used");
                 return;
             }
@@ -581,7 +581,7 @@ internal class PremonitionPatcher(
                     break;
                 }
                 if (found) continue;
-                Premonition.LogSource.LogError(
+                LogError(
                     $"Error patching {methodBeingPatched.FullName} with {patchMethod.FullName}, unknown argument: {argument.Name}");
                 return;
             }
@@ -631,7 +631,7 @@ internal class PremonitionPatcher(
 
         methodBeingPatched.Body.Instructions.Clear();
         methodBeingPatched.Body.Instructions.AddRange(newBody);
-        Premonition.LogSource.LogInfo(
+        LogInfo(
             $"Successfully patched {methodBeingPatched.FullName} with {patchMethodInModule.FullName}");
     }
 
@@ -654,7 +654,7 @@ internal class PremonitionPatcher(
                 {
                     if (inModuleArgument.ParameterType.FullName != methodBeingPatched.ReturnType.FullName)
                     {
-                        Premonition.LogSource.LogError(
+                        LogError(
                             $"Error patching {methodBeingPatched.FullName} with {patchMethod.FullName}, type of __retVal argument does not match the return type of the method being patched");
                         return;
                     }
@@ -662,7 +662,7 @@ internal class PremonitionPatcher(
                 }
                 else
                 {
-                    Premonition.LogSource.LogError(
+                    LogError(
                         $"Error patching {methodBeingPatched.FullName} with {patchMethod.FullName}, __retVal must be the first argument if it is used");
                     return;
                 }
@@ -678,7 +678,7 @@ internal class PremonitionPatcher(
                     break;
                 }
                 if (found) continue;
-                Premonition.LogSource.LogError(
+                LogError(
                     $"Error patching {methodBeingPatched.FullName} with {patchMethodInModule.FullName}, unknown argument: {argument.Name}");
                 return;
             }
@@ -730,7 +730,7 @@ internal class PremonitionPatcher(
 
         methodBeingPatched.Body.Instructions.Clear();
         methodBeingPatched.Body.Instructions.AddRange(newBody);
-        Premonition.LogSource.LogInfo(
+        LogInfo(
             $"Successfully patched {methodBeingPatched.FullName} with {patchMethodInModule.FullName}");
     }
     
@@ -760,7 +760,7 @@ internal class PremonitionPatcher(
                     break;
                 }
                 if (found) continue;
-                Premonition.LogSource.LogError(
+                LogError(
                     $"Error patching {methodBeingPatched.FullName} with {patchMethod.FullName}, unknown argument: {argument.Name}");
                 return;
             }
@@ -804,7 +804,7 @@ internal class PremonitionPatcher(
         
         // methodBeingPatched.Dump();
         
-        Premonition.LogSource.LogInfo(
+        LogInfo(
             $"Successfully patched {methodBeingPatched.FullName} with {patchMethod.FullName}");
     }
 }

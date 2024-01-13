@@ -1,7 +1,7 @@
 ﻿using System.Text;
 using Mono.Cecil;
 
-namespace Premonition.Utility;
+namespace Premonition.Core.Utility;
 
 public static class Extensions
 {
@@ -50,7 +50,7 @@ public static class Extensions
     {
         foreach (var line in definition.ToIlString().Split("\n"))
         {
-            Premonition.LogSource.LogInfo(line);
+            LogInfo(line);
         }
     }
     

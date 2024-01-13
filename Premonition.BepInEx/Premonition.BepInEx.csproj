@@ -1,16 +1,18 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <OutputType>Exe</OutputType>
         <TargetFramework>net6.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <RootNamespace>PremonitionTesters</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\DummyMod\DummyMod.csproj" />
-      <ProjectReference Include="..\PremonitionInvoker\PremonitionInvoker.csproj" />
+      <PackageReference Include="BepInEx.BaseLib" Version="5.4.21" />
+      <PackageReference Include="BepInEx.Core" Version="5.4.21" />
+      <PackageReference Include="JetBrains.Annotations" Version="2023.3.0" />
+    </ItemGroup>
+
+    <ItemGroup>
       <ProjectReference Include="..\Premonition.Core\Premonition.Core.csproj" />
     </ItemGroup>
 

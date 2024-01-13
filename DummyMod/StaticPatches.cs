@@ -1,5 +1,5 @@
 ﻿using System;
-using Premonition.Attributes;
+using Premonition.Core.Attributes;
 using DummyGame;
 namespace DummyMod;
 
@@ -41,5 +41,27 @@ public class StaticPatches
     public static T Generic<T>(List<T> from, int index)
     {
         return from[index + 1];
+    }
+
+    [PremonitionMethod(nameof(StaticMethods.GenericValue))]
+    [PremonitionTrampoline]
+    public static T? GenericValue<T>(T from) where T : struct
+    {
+        return from;
+    }
+
+    [PremonitionMethod(nameof(StaticMethods.ReturnsDoubleInput))]
+    [PremonitionPostfix]
+    public static int ReturnsDoubleInput(int __retVal)
+    {
+        return __retVal * 2;
+    }
+
+    [PremonitionMethod(nameof(StaticMethods.ReturnsTripleInput))]
+    [PremonitionPrefix]
+    public static bool ReturnsTripleInput(int input, out int __retVal)
+    {
+        __retVal = 0;
+        return input >= 3;
     }
 }

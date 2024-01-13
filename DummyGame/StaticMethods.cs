@@ -67,4 +67,17 @@ public static class StaticMethods
     {
         return from[index];
     }
+    
+    public static T? GenericValue<T>(T from) where T : struct
+    {
+        return null;
+    }
+
+
+    public static int ReturnsDoubleInput(int input)
+    {
+        return input * 2;
+    }
+
+    public static int ReturnsTripleInput(int input) => input * 3;
 }

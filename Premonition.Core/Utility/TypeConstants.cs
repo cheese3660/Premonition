@@ -1,6 +1,6 @@
 ﻿using JetBrains.Annotations;
 
-namespace Premonition.Utility;
+namespace Premonition.Core.Utility;
 
 [PublicAPI]
 public static class TypeConstants

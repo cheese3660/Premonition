@@ -7,7 +7,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\DummyGame\DummyGame.csproj" />
-      <ProjectReference Include="..\Premonition\Premonition.csproj" />
+      <ProjectReference Include="..\Premonition.Core\Premonition.Core.csproj" />
     </ItemGroup>
 
 </Project>

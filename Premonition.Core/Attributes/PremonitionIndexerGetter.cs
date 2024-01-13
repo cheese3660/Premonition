@@ -1,8 +1,8 @@
-﻿using Premonition.Utility;
-using JetBrains.Annotations;
+﻿using JetBrains.Annotations;
 using Mono.Cecil;
+using Premonition.Core.Utility;
 
-namespace Premonition.Attributes;
+namespace Premonition.Core.Attributes;
 
 [AttributeUsage(AttributeTargets.Method)]
 [MeansImplicitUse]
