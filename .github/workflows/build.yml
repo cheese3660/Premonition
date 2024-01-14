@@ -22,8 +22,10 @@ jobs:
       - name: Run tests
         id: run-tests
         run: |
-          ls ./build/bin/tests/Release/PremonitionPreTester/Release/net6.0/
-          result=$(./build/bin/tests/Release/PremonitionPreTester/Release/net6.0/PremonitionPreTester)
+          pushd
+          cd ./build/bin/tests/Release/PremonitionPreTester/Release/net6.0/
+          result=$(./PremonitionPreTester)
+          popd
           if [ "$result" == "0" ] then
             echo "Tests ran successfully"
           else
