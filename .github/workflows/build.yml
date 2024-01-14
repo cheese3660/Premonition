@@ -23,9 +23,10 @@ jobs:
         id: run-tests
         run: |
           pushd ./build/bin/tests/Release/PremonitionPreTester/Release/net6.0/
-          result=$(./PremonitionPreTester)
+          ./PremonitionPreTester
+          $result=$(cat result)
           popd
-          if [ "$result" == "0" ] then
+          if [ "$result" == "SUCCESS" ] then
             echo "Tests ran successfully"
           else
             echo "Tests failed"
