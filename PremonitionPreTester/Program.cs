@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 using Mono.Cecil;
 using Premonition.Core;
 using Premonition.Core.Utility;
+using PremonitionTester;
 using PremonitionTesters;
 // using TesterDLL;
 
@@ -32,13 +33,15 @@ using (var tester = new Process())
 
     tester.StartInfo.UseShellExecute = false;
     tester.StartInfo.RedirectStandardOutput = true;
+    tester.StartInfo.RedirectStandardError = true;
     tester.Start();
     while (!tester.HasExited)
     {
     }
 
     Console.WriteLine(tester.StandardOutput.ReadToEnd());
-    return tester.ExitCode;
+    File.WriteAllText("result", tester.ExitCode == 0 ? "SUCCESS" : "FAILURE");
+    return 0;
 }
 
 
