@@ -13,16 +13,25 @@ var manager = new PremonitionManager();
 
 manager.ReadAssembly("DummyMod.dll");
 
-var definition = AssemblyDefinition.ReadAssembly("DummyGame.dll");
+using (var definition = AssemblyDefinition.ReadAssembly("DummyGame.dll"))
+{
+    Console.WriteLine(definition.Name.Name);
+    manager.Patch(definition);
+    definition.Write("PatchedDummyGame.dll");
+}
+
+File.Delete("DummyGame.dll");
+File.Copy("PatchedDummyGame.dll", "DummyGame.Dll");
 
 
-Console.WriteLine(definition.Name.Name);
-manager.Patch(definition);
-definition.Write("PatchedDummyGame.dll");
+var processInfo = Process.Start("PremonitionTester.exe");
 
+while (!processInfo.HasExited)
+{
+    // Spin
+}
 
-Process.Start("PremonitionInvoker.exe");
-
+return processInfo.ExitCode;
 
 // return TestRunner.RunTests() ? 0 : 1;
 
