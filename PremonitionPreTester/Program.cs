@@ -23,7 +23,9 @@ using (var definition = AssemblyDefinition.ReadAssembly("DummyGame.dll"))
 }
 
 File.Delete("DummyGame.dll");
-File.Copy("PatchedDummyGame.dll", "DummyGame.Dll");
+Thread.Sleep(100);
+File.Copy("PatchedDummyGame.dll", "DummyGame.dll");
+Thread.Sleep(100);
 
 using (var tester = new Process())
 {
@@ -32,14 +34,12 @@ using (var tester = new Process())
         : "PremonitionTester.exe";
 
     tester.StartInfo.UseShellExecute = false;
-    tester.StartInfo.RedirectStandardOutput = true;
-    tester.StartInfo.RedirectStandardError = true;
     tester.Start();
     while (!tester.HasExited)
     {
     }
 
-    Console.WriteLine(tester.StandardOutput.ReadToEnd());
+    // Console.WriteLine(tester.StandardOutput.ReadToEnd());
     File.WriteAllText("result", tester.ExitCode == 0 ? "SUCCESS" : "FAILURE");
     return 0;
 }
