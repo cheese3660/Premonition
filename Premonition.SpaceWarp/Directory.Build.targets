@@ -67,8 +67,7 @@
         <Copy Condition="$(ConfigurationName) == Debug Or $(ConfigurationName) == DeploySpaceWarp Or $(ConfigurationName) == DeployAndRunSpaceWarp"
               SourceFiles="@(LibraryPDBs)"
               DestinationFolder="$(SolutionDir)/dist/$(ConfigurationName)/SpaceWarp/BepInEx/plugins/Premonition"/>
-
-
+        
         <!-- Compressing build directory for release -->
         <Message Text="Compressing built plugin folder" Condition="$(ConfigurationName) == Release"/>
         <Delete Condition="$(ConfigurationName) == Release"
