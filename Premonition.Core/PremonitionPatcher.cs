@@ -234,7 +234,7 @@ public class PremonitionPatcher(
                 {
                     if (methodBeingPatched.Parameters[i].Name != argument.Name) continue;
                     found = true;
-                    argumentIndices.Add(i);
+                    argumentIndices.Add(methodBeingPatched.IsStatic ? i : i+1);
                     break;
                 }
                 if (found) continue;
@@ -587,7 +587,7 @@ public class PremonitionPatcher(
                     {
                         if (methodBeingPatched.Parameters[i].Name != argument.Name) continue;
                         found = true;
-                        argumentIndices.Add(i);
+                        argumentIndices.Add(methodBeingPatched.IsStatic ? i : i+1);
                         break;
                     }
                     if (found) continue;
@@ -680,7 +680,7 @@ public class PremonitionPatcher(
                     {
                         if (methodBeingPatched.Parameters[i].Name != argument.Name) continue;
                         found = true;
-                        argumentIndices.Add(i);
+                        argumentIndices.Add(methodBeingPatched.IsStatic ? i : i+1);
                         break;
                     }
                     if (found) continue;
@@ -762,7 +762,7 @@ public class PremonitionPatcher(
                 {
                     if (methodBeingPatched.Parameters[i].Name != argument.Name) continue;
                     found = true;
-                    argumentIndices.Add(i);
+                    argumentIndices.Add(methodBeingPatched.IsStatic ? i : i+1);
                     break;
                 }
                 if (found) continue;
