@@ -22,7 +22,9 @@ jobs:
       - name: Run tests
         id: run-tests
         run: |
-          result=$(mono ./build/bin/tests/Release/PremonitionPreTester/Release/net6.0/PremonitionTester.exe)
+          pushd ./build/bin/tests/Release/PremonitionPreTester/Release/net6.0/
+          result=$(./PremonitionPreTester)
+          popd
           if [ "$result" == "0" ] then
             echo "Tests ran successfully"
           else
