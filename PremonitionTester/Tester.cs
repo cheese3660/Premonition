@@ -6,11 +6,14 @@ using PremonitionTester.Utilities.Exceptions;
 
 namespace PremonitionTester;
 
+/// <summary>
+/// A class used for running tests
+/// </summary>
 public static class Tester
 {
     private static Dictionary<string, List<(string, Action)>>? _tests;
 
-    public static Dictionary<string, List<(string, Action)>> Tests
+    private static Dictionary<string, List<(string, Action)>> Tests
     {
         get
         {
@@ -49,6 +52,10 @@ public static class Tester
         Failed
     }
 
+    /// <summary>
+    /// Run all tests
+    /// </summary>
+    /// <returns>true if all tests passed</returns>
     public static bool RunTests()
     {
         Console.WriteLine("---- Running all tests ----");
@@ -75,7 +82,7 @@ public static class Tester
                 {
                     test();
                 }
-                catch (TestPassedException testPassedException)
+                catch (TestPassedException)
                 {
                     result = TestResult.Passed;
                 }

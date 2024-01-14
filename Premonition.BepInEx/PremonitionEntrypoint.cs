@@ -12,7 +12,7 @@ public static class PremonitionEntrypoint
 {
     static PremonitionEntrypoint()
     {
-        Assembly.LoadFile($"{new FileInfo(typeof(PremonitionEntrypoint).Assembly.Location).Directory!.FullName}\\Premonition.dll");
+        Assembly.LoadFile($"{new FileInfo(typeof(PremonitionEntrypoint).Assembly.Location).Directory!.FullName}\\Premonition.Core.dll");
     }
     
     private static ConfigFile? _premonitionConfiguration;

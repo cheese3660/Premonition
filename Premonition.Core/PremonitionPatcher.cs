@@ -5,10 +5,18 @@ using Mono.Cecil.Rocks;
 using Mono.Collections.Generic;
 using MonoMod.Utils;
 using Premonition.Core.Utility;
-using static Premonition.Core.Utility.Extensions;
 
 namespace Premonition.Core;
 
+/// <summary>
+/// A descriptor for a patcher
+/// </summary>
+/// <param name="assembly">The assembly being patched</param>
+/// <param name="typeName">The type being patched</param>
+/// <param name="methodName">The method being patched</param>
+/// <param name="argumentTypes">The optional argument types to match for the method being patched</param>
+/// <param name="patchType">The type of patch</param>
+/// <param name="patchMethod">The method being used to patch with</param>
 public class PremonitionPatcher(
     string assembly,
     string typeName,
@@ -17,6 +25,9 @@ public class PremonitionPatcher(
     PatchType patchType,
     MethodReference patchMethod)
 {
+    /// <summary>
+    /// The assembly being patched
+    /// </summary>
     public string Assembly => assembly;
 
     /// <summary>
@@ -295,7 +306,7 @@ public class PremonitionPatcher(
         List<int> argumentIndices)
     {
         VariableDefinition? lastVariable = null;
-        int lastIndex = 0;
+        var lastIndex = 0;
         if (methodBeingPatched.ReturnType.FullName != TypeConstants.Void)
         {
             if (argumentIndices.All(x => x != -1))
@@ -558,35 +569,33 @@ public class PremonitionPatcher(
         // We already know with this one that the first argument should be the return value, so lets get every other argument
         List<int> argumentIndices = [];
 
-        var argIndex = 0;
         foreach (var argument in patchMethod.Parameters.Skip(1))
         {
-            if (argument.Name == "__instance")
+            switch (argument.Name)
             {
-                argumentIndices.Add(0);
-            } else if (argument.Name == "__retVal")
-            {
-                LogError(
-                    $"Error patching {methodBeingPatched.FullName} with {patchMethod.FullName}, __retVal must be the first argument if it is used");
-                return;
-            }
-            else
-            {
-                var found = false;
-                for (var i = 0; i < methodBeingPatched.Parameters.Count; i++)
-                {
-                    if (methodBeingPatched.Parameters[i].Name != argument.Name) continue;
-                    found = true;
-                    argumentIndices.Add(i);
+                case "__instance":
+                    argumentIndices.Add(0);
                     break;
+                case "__retVal":
+                    LogError(
+                        $"Error patching {methodBeingPatched.FullName} with {patchMethod.FullName}, __retVal must be the first argument if it is used");
+                    return;
+                default:
+                {
+                    var found = false;
+                    for (var i = 0; i < methodBeingPatched.Parameters.Count; i++)
+                    {
+                        if (methodBeingPatched.Parameters[i].Name != argument.Name) continue;
+                        found = true;
+                        argumentIndices.Add(i);
+                        break;
+                    }
+                    if (found) continue;
+                    LogError(
+                        $"Error patching {methodBeingPatched.FullName} with {patchMethod.FullName}, unknown argument: {argument.Name}");
+                    return;
                 }
-                if (found) continue;
-                LogError(
-                    $"Error patching {methodBeingPatched.FullName} with {patchMethod.FullName}, unknown argument: {argument.Name}");
-                return;
             }
-
-            argIndex++;
         }
 
         if (patchMethodInModule.Parameters.Count >= methodBeingPatched.Body.MaxStackSize)
@@ -644,13 +653,12 @@ public class PremonitionPatcher(
         foreach (var argument in patchMethod.Parameters)
         {
             var inModuleArgument = patchMethodInModule.Parameters[argIndex];
-            if (argument.Name == "__instance")
+            switch (argument.Name)
             {
-                argumentIndices.Add(0);
-            }
-            else if (argument.Name == "__retVal")
-            {
-                if (first)
+                case "__instance":
+                    argumentIndices.Add(0);
+                    break;
+                case "__retVal" when first:
                 {
                     if (inModuleArgument.ParameterType.FullName != methodBeingPatched.ReturnType.FullName)
                     {
@@ -659,28 +667,27 @@ public class PremonitionPatcher(
                         return;
                     }
                     argumentIndices.Add(-1);
+                    break;
                 }
-                else
-                {
+                case "__retVal":
                     LogError(
                         $"Error patching {methodBeingPatched.FullName} with {patchMethod.FullName}, __retVal must be the first argument if it is used");
                     return;
-                }
-            }
-            else
-            {
-                var found = false;
-                for (var i = 0; i < methodBeingPatched.Parameters.Count; i++)
+                default:
                 {
-                    if (methodBeingPatched.Parameters[i].Name != argument.Name) continue;
-                    found = true;
-                    argumentIndices.Add(i);
-                    break;
+                    var found = false;
+                    for (var i = 0; i < methodBeingPatched.Parameters.Count; i++)
+                    {
+                        if (methodBeingPatched.Parameters[i].Name != argument.Name) continue;
+                        found = true;
+                        argumentIndices.Add(i);
+                        break;
+                    }
+                    if (found) continue;
+                    LogError(
+                        $"Error patching {methodBeingPatched.FullName} with {patchMethodInModule.FullName}, unknown argument: {argument.Name}");
+                    return;
                 }
-                if (found) continue;
-                LogError(
-                    $"Error patching {methodBeingPatched.FullName} with {patchMethodInModule.FullName}, unknown argument: {argument.Name}");
-                return;
             }
             first = false;
             argIndex += 1;
@@ -742,7 +749,6 @@ public class PremonitionPatcher(
 
         var patchMethodInModule = Import(methodBeingPatched, patchMethod);
         if (patchMethodInModule == null) return;
-        var argIndex = 0;
         foreach (var argument in patchMethod.Parameters)
         {
             if (argument.Name == "__instance")
@@ -764,7 +770,6 @@ public class PremonitionPatcher(
                     $"Error patching {methodBeingPatched.FullName} with {patchMethod.FullName}, unknown argument: {argument.Name}");
                 return;
             }
-            argIndex += 1;
         }
 
         if (patchMethodInModule.Parameters.Count >= methodBeingPatched.Body.MaxStackSize)

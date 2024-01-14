@@ -4,9 +4,15 @@ using PremonitionTester.Utilities;
 
 namespace PremonitionTester.Tests;
 
+/// <summary>
+/// A list of tests for DummyGame.StaticMethods
+/// </summary>
 [TestSection("Static Tests")]
 public static class StaticTests
 {
+    /// <summary>
+    /// Tests whether or not the trampoline for StaticVoidMethodOne worked
+    /// </summary>
     [Test("StaticVoidMethodOne() Trampoline")]
     public static void StaticVoidMethodOne()
     {
@@ -15,6 +21,9 @@ public static class StaticTests
         Testing.AssertEqual(StaticMethods.StaticVoidMethodOneDummyValue, 2);
     }
 
+    /// <summary>
+    /// Tests whether or not the prefix for StaticVoidMethodTwo worked
+    /// </summary>
     [Test("StaticVoidMethodTwo() Prefix")]
     public static void StaticVoidMethodTwo()
     {
@@ -23,6 +32,10 @@ public static class StaticTests
         Testing.AssertEqual(StaticMethods.StaticVoidMethodTwoDummyValue, 10);
     }
     
+    
+    /// <summary>
+    /// Tests whether or not the postfix for StaticVoidMethodThree worked
+    /// </summary>
     [Test("StaticVoidMethodThree() Postfix")]
     public static void StaticVoidMethodThree()
     {
@@ -31,6 +44,9 @@ public static class StaticTests
         Testing.AssertEqual(StaticMethods.StaticVoidMethodThreeDummyValue, 16);
     }
 
+    /// <summary>
+    /// Tests whether or not the postfix for MultipleReturn worked
+    /// </summary>
     [Test("MultipleReturn() Postfix")]
     public static void MultipleReturn()
     {
@@ -48,6 +64,10 @@ public static class StaticTests
         Testing.AssertEqual(StaticMethods.MultipleReturnDummyValue, 16);
     }
 
+    
+    /// <summary>
+    /// Tests whether or not the trampoline for Generic worked
+    /// </summary>
     [Test("Generic() Trampoline")]
     public static void Generic()
     {
@@ -64,7 +84,10 @@ public static class StaticTests
         Testing.Log("Testing that Generic([(0,1,2),(3,4,5),(6,7,8)],1) returns (6,7,8)");
         Testing.AssertEqual(StaticMethods.Generic([(0,1,2),(3,4,5),(6,7,8)],1),(6,7,8));
     }
-
+    
+    /// <summary>
+    /// Tests whether or not the postfix for GenericValue worked
+    /// </summary>
     [Test("GenericValue() Trampoline")]
     public static void GenericValue()
     {
@@ -73,7 +96,11 @@ public static class StaticTests
         Testing.Log("Testing that GenericValue((0,1,2)) returns (0,1,2)");
         Testing.AssertEqual(StaticMethods.GenericValue((0,1,2)),(0,1,2));
     }
-
+    
+    
+    /// <summary>
+    /// Tests whether or not the postfix for ReturnsDoubleInput worked
+    /// </summary>
     [Test("ReturnsDoubleInput() Postfix")]
     public static void ReturnsDoubleInput()
     {
@@ -83,6 +110,10 @@ public static class StaticTests
         Testing.AssertEqual(StaticMethods.ReturnsDoubleInput(4), 16);
     }
     
+    
+    /// <summary>
+    /// Tests whether or not the prefix for ReturnsTripleInput worked
+    /// </summary>
     [Test("ReturnsTripleInput() Prefix")]
     public static void ReturnsTripleInput()
     {

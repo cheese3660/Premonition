@@ -1,9 +1,14 @@
-﻿using JetBrains.Annotations;
+﻿using System;
+using System.Linq;
+using JetBrains.Annotations;
 using Mono.Cecil;
 using Premonition.Core.Utility;
 
 namespace Premonition.Core.Attributes;
 
+/// <summary>
+/// Patch an indexer setter <code>this[] {set;}</code>
+/// </summary>
 [AttributeUsage(AttributeTargets.Method)]
 [MeansImplicitUse]
 [PublicAPI]

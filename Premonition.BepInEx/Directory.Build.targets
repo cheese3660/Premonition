@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+    <PropertyGroup>
+        <NuGetExecutable Condition="'$(OS)' == 'Windows_NT'">nuget</NuGetExecutable>
+        <NuGetExecutable Condition="'$(OS)' != 'Windows_NT'">mono /usr/local/bin/nuget.exe</NuGetExecutable>
+        <PowerShellExecutable Condition="'$(OS)' == 'Windows_NT'">powershell</PowerShellExecutable>
+        <PowerShellExecutable Condition="'$(OS)' != 'Windows_NT'">pwsh</PowerShellExecutable>
+    </PropertyGroup>
+    <Target Label="Post build events" Name="PostBuild" AfterTargets="PostBuildEvent">
+        <!-- Cleanup of older builds -->
+        <Message Text="Cleaning up previous build directory"/>
+        <RemoveDir Directories="$(SolutionDir)/dist/$(ConfigurationName)/BepInEx"/>
+        <MakeDir Directories="$(SolutionDir)/dist/$(ConfigurationName)/BepInEx/BepInEx/patchers/Premonition"/>
+
+        <Message Text="Copying LICENSE and README to build directory"/>
+        <Copy Condition="Exists('$(SolutionDir)/LICENSE')"
+              SourceFiles="$(SolutionDir)/LICENSE"
+              DestinationFolder="$(SolutionDir)/dist/$(ConfigurationName)/BepInEx/BepInEx/patchers/Premonition"/>
+        <Copy Condition="Exists('$(SolutionDir)/README.md')"
+              SourceFiles="$(SolutionDir)/README.md"
+              DestinationFiles="$(SolutionDir)/dist/$(ConfigurationName)/BepInEx/BepInEx/patchers/Premonition/README.txt"/>
+
+        <!-- Copying compiled patcher to build directory -->
+        <Message Text="Copying patcher DLLs to build directory"/>
+        <ItemGroup Label="Patcher DLLs to be copied">
+            <PatcherDLLs Include="$(PatcherBinPath)/**/*.dll"/>
+        </ItemGroup>
+        <Copy SourceFiles="@(PatcherDLLs)"
+              DestinationFolder="$(SolutionDir)/dist/$(ConfigurationName)/BepInEx/BepInEx/patchers/Premonition"/>
+
+        <Message Text="Copying patcher PDBs to build directory"
+                 Condition="$(ConfigurationName) == Debug Or $(ConfigurationName) == DeploySpaceWarp Or $(ConfigurationName) == DeployAndRunSpaceWarp"/>
+        <ItemGroup Label="Patcher PDBs to be copied">
+            <PatcherPDBs Include="$(PatcherBinPath)/**/*.pdb"/>
+        </ItemGroup>
+        <Copy Condition="$(ConfigurationName) == Debug Or $(ConfigurationName) == DeploySpaceWarp Or $(ConfigurationName) == DeployAndRunSpaceWarp"
+              SourceFiles="@(PatcherPDBs)"
+              DestinationFolder="$(SolutionDir)/dist/$(ConfigurationName)/BepInEx/BepInEx/patchers/Premonition"/>
+
+        <!-- Copying compiled library to build directory -->
+        <Message Text="Copying library DLLs to build directory"/>
+        <ItemGroup Label="Library DLLs to be copied">
+            <LibraryDLLs Include="$(LibraryBinPath)/**/*.dll"/>
+        </ItemGroup>
+        <Copy SourceFiles="@(LibraryDLLs)"
+              DestinationFolder="$(SolutionDir)/dist/$(ConfigurationName)/BepInEx/BepInEx/patchers/Premonition"/>
+
+        <Message Text="Copying Library PDBs to build directory"
+                 Condition="$(ConfigurationName) == Debug Or $(ConfigurationName) == DeploySpaceWarp Or $(ConfigurationName) == DeployAndRunSpaceWarp"/>
+        <ItemGroup Label="Library PDBs to be copied">
+            <LibraryPDBs Include="$(LibraryBinPath)/**/*.pdb"/>
+        </ItemGroup>
+        <Copy Condition="$(ConfigurationName) == Debug Or $(ConfigurationName) == DeploySpaceWarp Or $(ConfigurationName) == DeployAndRunSpaceWarp"
+              SourceFiles="@(LibraryPDBs)"
+              DestinationFolder="$(SolutionDir)/dist/$(ConfigurationName)/BepInEx/BepInEx/patchers/Premonition"/>
+
+
+        <!-- Compressing build directory for release -->
+        <Message Text="Compressing built plugin folder" Condition="$(ConfigurationName) == Release"/>
+        <Delete Condition="$(ConfigurationName) == Release"
+                Files="$(SolutionDir)/dist/$(SolutionName)-BepInEx-$(Version).zip"/>
+        <Exec Condition="$(ConfigurationName) == Release"
+              Command="$(PowerShellExecutable) -Command &quot;&amp; {Push-Location '$(SolutionDir)/dist/$(ConfigurationName)/BepInEx'; Compress-Archive -Path './*' -DestinationPath '$(SolutionDir)/dist/$(SolutionName)-BepInEx-$(Version).zip'; Pop-Location}&quot;"/>
+    </Target>
+</Project>

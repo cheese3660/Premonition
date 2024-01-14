@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+    <Import Project="$(SolutionDir)/Directory.Build.props"/>
+
+    <!-- Build configuration -->
+    <PropertyGroup>
+        <BaseOutputPath>$(LibraryBinPath)/$(MSBuildProjectName)</BaseOutputPath>
+        <BaseIntermediateOutputPath>$(SolutionDir)build/obj/lib/$(MSBuildProjectName)</BaseIntermediateOutputPath>
+    </PropertyGroup>
+</Project>

@@ -1,13 +1,25 @@
-﻿using Mono.Cecil;
+﻿using System.Collections.Generic;
+using System.Linq;
+using Mono.Cecil;
 using Premonition.Core.Attributes;
 
 namespace Premonition.Core;
 
+/// <summary>
+/// This is the main manager class for premonition patching
+/// </summary>
 public class PremonitionManager
 {
     
+    /// <summary>
+    /// The list of currently active patcher methods
+    /// </summary>
     public readonly List<PremonitionPatcher> PremonitionPatchers = [];
     
+    /// <summary>
+    /// Reads a dll file to get all the patchers from it
+    /// </summary>
+    /// <param name="dllPath">Said dll file</param>
     public void ReadAssembly(string dllPath)
     {
         var assemblyDefinition = AssemblyDefinition.ReadAssembly(dllPath);
@@ -219,6 +231,10 @@ public class PremonitionManager
     }
 
 
+    /// <summary>
+    /// Apply the active patchers to an assembly, removing any that are applied
+    /// </summary>
+    /// <param name="definition">The assembly to be modified</param>
     public void Patch(AssemblyDefinition definition)
     {
         List<int> toRemove = [];

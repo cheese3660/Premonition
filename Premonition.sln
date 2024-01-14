@@ -20,6 +20,8 @@ Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
+		DeploySpaceWarp|Any CPU = DeploySpaceWarp|Any CPU
+		DeployAndRunSpaceWarp|Any CPU = DeployAndRunSpaceWarp|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{0BB3077A-1EF3-49B6-AFCD-8A3BA0F85545}.Debug|Any CPU.ActiveCfg = Debug|Any CPU

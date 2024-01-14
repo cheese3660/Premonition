@@ -1,9 +1,15 @@
-﻿using JetBrains.Annotations;
+﻿using System;
+using System.Linq;
+using JetBrains.Annotations;
 using Mono.Cecil;
 using Premonition.Core.Utility;
 
 namespace Premonition.Core.Attributes;
 
+/// <summary>
+/// Patch a getter for a property
+/// </summary>
+/// <param name="property">The name of the property</param>
 [AttributeUsage(AttributeTargets.Method)]
 [MeansImplicitUse]
 [PublicAPI]

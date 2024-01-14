@@ -4,34 +4,30 @@ using ILogListener = Premonition.Core.Utility.ILogListener;
 
 namespace PremonitionTesters;
 
+/// <summary>
+/// The log listener used for testing
+/// </summary>
 public sealed class PremonitionLogListener : ILogListener
 {
-    public void Dispose()
-    {
-    }
-
-    public void LogEvent(object sender, LogEventArgs eventArgs)
-    {
-        Console.WriteLine($"[{DateTime.Now}] {eventArgs}");
-    }
-
-
-    
+    /// <inheritdoc />
     public void LogDebug(object value)
     {
         Console.WriteLine($"[{DateTime.Now}] [DEBUG] {value}");
     }
 
+    /// <inheritdoc />
     public void LogInfo(object value)
     {
         Console.WriteLine($"[{DateTime.Now}] [ INFO] {value}");
     }
 
+    /// <inheritdoc />
     public void LogWarning(object value)
     {
         Console.WriteLine($"[{DateTime.Now}] [ WARN] {value}");
     }
 
+    /// <inheritdoc />
     public void LogError(object value)
     {
         Console.WriteLine($"[{DateTime.Now}] [ERROR] {value}");

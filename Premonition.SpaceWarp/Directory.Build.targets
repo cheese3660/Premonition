@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+    <PropertyGroup>
+        <NuGetExecutable Condition="'$(OS)' == 'Windows_NT'">nuget</NuGetExecutable>
+        <NuGetExecutable Condition="'$(OS)' != 'Windows_NT'">mono /usr/local/bin/nuget.exe</NuGetExecutable>
+        <PowerShellExecutable Condition="'$(OS)' == 'Windows_NT'">powershell</PowerShellExecutable>
+        <PowerShellExecutable Condition="'$(OS)' != 'Windows_NT'">pwsh</PowerShellExecutable>
+    </PropertyGroup>
+    <Target Label="Post build events" Name="PostBuild" AfterTargets="PostBuildEvent">
+        <!-- Cleanup of older builds -->
+        <Message Text="Cleaning up previous build directory"/>
+        <RemoveDir Directories="$(SolutionDir)/dist/$(ConfigurationName)/SpaceWarp"/>
+        <MakeDir Directories="$(SolutionDir)/dist/$(ConfigurationName)/SpaceWarp/BepInEx/plugins/Premonition"/>
+
+        <!-- Copying general files to build directory -->
+        <ItemGroup Label="Plugin template folder to be copied">
+            <PluginTemplate Include="$(SolutionDir)/plugin_template/**/*.*"/>
+        </ItemGroup>
+        <Message Text="Copying plugin folder to build directory"/>
+        <Copy SourceFiles="@(PluginTemplate)"
+              DestinationFolder="$(SolutionDir)/dist/$(ConfigurationName)/SpaceWarp/BepInEx/plugins/Premonition/%(RecursiveDir)"/>
+
+        <Message Text="Copying LICENSE and README to build directory"/>
+        <Copy Condition="Exists('$(SolutionDir)/LICENSE')"
+              SourceFiles="$(SolutionDir)/LICENSE"
+              DestinationFolder="$(SolutionDir)/dist/$(ConfigurationName)/SpaceWarp/BepInEx/plugins/Premonition"/>
+        <Copy Condition="Exists('$(SolutionDir)/README.md')"
+              SourceFiles="$(SolutionDir)/README.md"
+              DestinationFiles="$(SolutionDir)/dist/$(ConfigurationName)/SpaceWarp/BepInEx/plugins/Premonition/README.txt"/>
+
+        <!-- Copying compiled plugin to build directory -->
+        <Message Text="Copying plugin DLLs to build directory"/>
+        <ItemGroup Label="Plugin DLLs to be copied">
+            <PluginDLLs Include="$(PluginBinPath)/**/*.dll"/>
+        </ItemGroup>
+        <Message Text="@(PluginDLLs)"/>
+        <Copy SourceFiles="@(PluginDLLs)"
+              DestinationFolder="$(SolutionDir)/dist/$(ConfigurationName)/SpaceWarp/BepInEx/plugins/Premonition"/>
+
+        <Message Text="Copying plugin PDBs to build directory"
+                 Condition="$(ConfigurationName) == Debug Or $(ConfigurationName) == DeploySpaceWarp Or $(ConfigurationName) == DeployAndRunSpaceWarp"/>
+        <ItemGroup Label="Plugin PDBs to be copied">
+            <PluginPDBs Include="$(PluginBinPath)/**/*.pdb"/>
+        </ItemGroup>
+        <Copy Condition="$(ConfigurationName) == Debug Or $(ConfigurationName) == DeploySpaceWarp Or $(ConfigurationName) == DeployAndRunSpaceWarp"
+              SourceFiles="@(PluginPDBs)"
+              DestinationFolder="$(SolutionDir)/dist/$(ConfigurationName)/SpaceWarp/BepInEx/plugins/Premonition"/>
+
+        <!-- Copying compiled library to build directory -->
+        <Message Text="Copying library DLLs to build directory"/>
+        <ItemGroup Label="Library DLLs to be copied">
+            <LibraryDLLs Include="$(LibraryBinPath)/**/*.dll"/>
+        </ItemGroup>
+        <Copy SourceFiles="@(LibraryDLLs)"
+              DestinationFolder="$(SolutionDir)/dist/$(ConfigurationName)/BepInEx/BepInEx/patchers/Premonition"/>
+        <Copy SourceFiles="@(LibraryDLLs)"
+              DestinationFolder="$(SolutionDir)/dist/$(ConfigurationName)/SpaceWarp/BepInEx/plugins/Premonition"/>
+
+        <Message Text="Copying Library PDBs to build directory"
+                 Condition="$(ConfigurationName) == Debug Or $(ConfigurationName) == DeploySpaceWarp Or $(ConfigurationName) == DeployAndRunSpaceWarp"/>
+        <ItemGroup Label="Library PDBs to be copied">
+            <LibraryPDBs Include="$(LibraryBinPath)/**/*.pdb"/>
+        </ItemGroup>
+        <Copy Condition="$(ConfigurationName) == Debug Or $(ConfigurationName) == DeploySpaceWarp Or $(ConfigurationName) == DeployAndRunSpaceWarp"
+              SourceFiles="@(LibraryPDBs)"
+              DestinationFolder="$(SolutionDir)/dist/$(ConfigurationName)/BepInEx/BepInEx/patchers/Premonition"/>
+        <Copy Condition="$(ConfigurationName) == Debug Or $(ConfigurationName) == DeploySpaceWarp Or $(ConfigurationName) == DeployAndRunSpaceWarp"
+              SourceFiles="@(LibraryPDBs)"
+              DestinationFolder="$(SolutionDir)/dist/$(ConfigurationName)/SpaceWarp/BepInEx/plugins/Premonition"/>
+
+
+        <!-- Compressing build directory for release -->
+        <Message Text="Compressing built plugin folder" Condition="$(ConfigurationName) == Release"/>
+        <Delete Condition="$(ConfigurationName) == Release"
+                Files="$(SolutionDir)/dist/$(SolutionName)-SpaceWarp-$(Version).zip"/>
+        <Exec Condition="$(ConfigurationName) == Release"
+              Command="$(PowerShellExecutable) -Command &quot;&amp; {Push-Location '$(SolutionDir)/dist/$(ConfigurationName)/SpaceWarp'; Compress-Archive -Path './*' -DestinationPath '$(SolutionDir)/dist/$(SolutionName)-SpaceWarp-$(Version).zip'; Pop-Location}&quot;"/>
+
+        <!-- Deploying plugin to game folder -->
+        <Message Text="Clean up the game's plugin folder" Condition="$(ConfigurationName) == DeploySpaceWarp Or $(ConfigurationName) == DeployAndRunSpaceWarp"/>
+        <RemoveDir Condition="$(ConfigurationName) == DeploySpaceWarp Or $(ConfigurationName) == DeployAndRunSpaceWarp"
+                   Directories="$(KSP2DIR)/BepInEx/plugins/Premonition"/>
+        <MakeDir Condition="$(ConfigurationName) == DeploySpaceWarp Or $(ConfigurationName) == DeployAndRunSpaceWarp"
+                 Directories="$(KSP2DIR)/BepInEx/plugins/Premonition"/>
+
+        <ItemGroup Label="Dist folder to be copied">
+            <DistFolder Include="$(SolutionDir)/dist/$(ConfigurationName)/SpaceWarp/BepInEx/**/*.*"/>
+        </ItemGroup>
+        <Message Text="Deploy plugin to game folder"
+                 Condition="$(ConfigurationName) == DeploySpaceWarp Or $(ConfigurationName) == DeployAndRunSpaceWarp"/>
+        <Copy Condition="$(ConfigurationName) == DeploySpaceWarp Or $(ConfigurationName) == DeployAndRunSpaceWarp"
+              SourceFiles="@(DistFolder)"
+              DestinationFolder="$(KSP2DIR)/SpaceWarp/BepInEx/%(RecursiveDir)"/>
+
+        <!-- Run game after DeploySpaceWarp -->
+        <Message Text="Run game" Condition="$(ConfigurationName) == DeployAndRunSpaceWarp"/>
+        <Exec Command="&quot;$(KSP2DIR)/KSP2_x64.exe&quot;" Condition="$(ConfigurationName) == DeployAndRunSpaceWarp"/>
+    </Target>
+</Project>

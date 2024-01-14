@@ -12,7 +12,7 @@ public class PremonitionEntrypoint : BasePatcher
     private SpaceWarpPremonitionManager _manager;
     public PremonitionEntrypoint()
     {
-        Assembly.LoadFile($"{new FileInfo(GetType().Assembly.Location).Directory!.FullName}\\Premonition.dll");
+        Assembly.LoadFile($"{new FileInfo(GetType().Assembly.Location).Directory!.FullName}\\Premonition.Core.dll");
 
         _manager = new SpaceWarpPremonitionManager();
 
@@ -56,7 +56,7 @@ public class PremonitionEntrypoint : BasePatcher
                     _manager.Read(dll);
                 }
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 // ignore
             }

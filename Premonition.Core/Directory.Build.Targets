@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+    <PropertyGroup>
+        <NuGetExecutable Condition="'$(OS)' == 'Windows_NT'">nuget</NuGetExecutable>
+        <NuGetExecutable Condition="'$(OS)' != 'Windows_NT'">mono /usr/local/bin/nuget.exe</NuGetExecutable>
+        <PowerShellExecutable Condition="'$(OS)' == 'Windows_NT'">powershell</PowerShellExecutable>
+        <PowerShellExecutable Condition="'$(OS)' != 'Windows_NT'">pwsh</PowerShellExecutable>
+    </PropertyGroup>
+    <Target Label="Post build events" Name="PostBuild" AfterTargets="PostBuildEvent">
+        <!-- Copy library DLLs and XMLs into a temporary folder for NuGet packing -->
+        <Message Text="Copying library DLLs and XMLs to temporary folder for NuGet packing" Condition="$(ConfigurationName) == Release"/>
+        <ItemGroup Label="Library DLLs to be copied">
+            <LibraryDLLs Include="$(LibraryBinPath)/**/*.dll"/>
+        </ItemGroup>
+        <MakeDir Condition="$(ConfigurationName) == Release"
+                 Directories="$(SolutionDir)/temp_nuget"/>
+        <ItemGroup Label="Library XMLs to be copied">
+            <LibraryXMLs Include="$(LibraryBinPath)/**/*.xml"/>
+        </ItemGroup>
+        <Copy Condition="$(ConfigurationName) == Release"
+              SourceFiles="@(LibraryDLLs)"
+              DestinationFolder="$(SolutionDir)/temp_nuget"/>
+        <Copy Condition="$(ConfigurationName) == Release"
+              SourceFiles="@(LibraryXMLs)"
+              DestinationFolder="$(SolutionDir)/temp_nuget"/>
+        
+        <!-- Packing NuGet package -->
+        <Message Text="Packing NuGet package" Condition="$(ConfigurationName) == Release"/>
+        <Exec Condition="$(ConfigurationName) == Release"
+              Command="$(NuGetExecutable) pack &quot;$(SolutionDir)/Package.nuspec&quot; -OutputDirectory &quot;$(SolutionDir)/nuget&quot; -Properties &quot;NoWarn=NU5125;id=$(ProjectName);version=$(Version);authors=$(Authors);description=$(Description);repositoryType=$(RepositoryType);repositoryUrl=$(RepositoryUrl)&quot;" />
+
+        <!-- Remove temporary folder -->
+        <Message Text="Removing temporary folder" Condition="$(ConfigurationName) == Release"/>
+        <RemoveDir Condition="$(ConfigurationName) == Release"
+                   Directories="$(SolutionDir)/temp_nuget"/>
+    </Target>
+</Project>

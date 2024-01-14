@@ -1,15 +1,24 @@
-﻿using JetBrains.Annotations;
+﻿using System;
+using System.Linq;
+using JetBrains.Annotations;
 using Mono.Cecil;
 using Premonition.Core.Utility;
 
 namespace Premonition.Core.Attributes;
 
 
+/// <summary>
+/// Determine the type to be patched
+/// </summary>
+/// <param name="fullName">The full name of the type being patched</param>
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
 [MeansImplicitUse]
 [PublicAPI]
 public class PremonitionType(string fullName) : Attribute
 {
+    /// <summary>
+    /// The full name of the target type to be matched against for patching
+    /// </summary>
     public string FullName => fullName;
     
     internal static PremonitionType? FromCecilType(TypeDefinition td)
