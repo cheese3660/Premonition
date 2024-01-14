@@ -42,7 +42,7 @@ jobs:
       - name: Find NuGet package
         id: find-nupkg
         run: |
-          ls nuget
+          ls .
           echo "nupkg=$(ls -1 nuget/Premonition.Core.*.nupkg | head -n 1)" >> $GITHUB_ENV
           echo "artifact_name=Premonition.Core" >> $GITHUB_ENV
 
