@@ -1,6 +1,7 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using Mono.Cecil;
 using Premonition.Core;
 using Premonition.Core.Utility;
@@ -24,14 +25,14 @@ File.Delete("DummyGame.dll");
 File.Copy("PatchedDummyGame.dll", "DummyGame.Dll");
 
 
-var processInfo = Process.Start("PremonitionTester.exe");
+var info = Process.Start(RuntimeInformation.IsOSPlatform(OSPlatform.Linux) ? "PremonitionTester" : "PremonitionTester.exe");
 
-while (!processInfo.HasExited)
+while (!info.HasExited)
 {
     // Spin
 }
 
-return processInfo.ExitCode;
+return info.ExitCode;
 
 // return TestRunner.RunTests() ? 0 : 1;
 
