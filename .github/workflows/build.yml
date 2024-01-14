@@ -22,8 +22,7 @@ jobs:
       - name: Run tests
         id: run-tests
         run: |
-          pushd
-          cd ./build/bin/tests/Release/PremonitionPreTester/Release/net6.0/
+          pushd ./build/bin/tests/Release/PremonitionPreTester/Release/net6.0/
           result=$(./PremonitionPreTester)
           popd
           if [ "$result" == "0" ] then
