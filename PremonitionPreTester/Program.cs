@@ -24,15 +24,23 @@ using (var definition = AssemblyDefinition.ReadAssembly("DummyGame.dll"))
 File.Delete("DummyGame.dll");
 File.Copy("PatchedDummyGame.dll", "DummyGame.Dll");
 
-
-var info = Process.Start(RuntimeInformation.IsOSPlatform(OSPlatform.Linux) ? "PremonitionTester" : "PremonitionTester.exe");
-
-while (!info.HasExited)
+using (var tester = new Process())
 {
-    // Spin
+    tester.StartInfo.FileName = RuntimeInformation.IsOSPlatform(OSPlatform.Linux)
+        ? "PremonitionTester"
+        : "PremonitionTester.exe";
+
+    tester.StartInfo.UseShellExecute = false;
+    tester.StartInfo.RedirectStandardOutput = true;
+    tester.Start();
+    while (!tester.HasExited)
+    {
+    }
+
+    Console.WriteLine(tester.StandardOutput.ReadToEnd());
+    return tester.ExitCode;
 }
 
-return info.ExitCode;
 
 // return TestRunner.RunTests() ? 0 : 1;
 
