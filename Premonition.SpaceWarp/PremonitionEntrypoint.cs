@@ -16,6 +16,7 @@ public class PremonitionEntrypoint : BasePatcher
 
         _manager = new SpaceWarpPremonitionManager();
 
+        
         var disabledPluginGuids = File.ReadAllLines(CommonPaths.DisabledPluginsFilepath);
         
         var swinfoPaths = Directory
@@ -56,8 +57,9 @@ public class PremonitionEntrypoint : BasePatcher
                     _manager.Read(dll);
                 }
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                _manager.LogSource.LogError(e);
                 // ignore
             }
         }

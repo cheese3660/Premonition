@@ -8,7 +8,7 @@ namespace Premonition.Core;
 /// <summary>
 /// This is the main manager class for premonition patching
 /// </summary>
-public class PremonitionManager
+public class PremonitionManager(IAssemblyResolver? resolver = null)
 {
     
     /// <summary>
@@ -22,7 +22,10 @@ public class PremonitionManager
     /// <param name="dllPath">Said dll file</param>
     public void ReadAssembly(string dllPath)
     {
-        var assemblyDefinition = AssemblyDefinition.ReadAssembly(dllPath);
+        var assemblyDefinition = AssemblyDefinition.ReadAssembly(dllPath, new ReaderParameters
+        {
+            AssemblyResolver = resolver
+        });
         RegisterAssembly(assemblyDefinition);
     }
 
@@ -100,10 +103,15 @@ public class PremonitionManager
             var argumentTypes = GetArgumentTypes(method);
             
             
+            // ReSharper disable once ConvertIfStatementToSwitchStatement
             if (hadPremonitionAttribute && missingAttributes.Count > 0)
             {
                 LogError(
                     $"Patch method {method.FullName} is missing the following necessary attributes: {string.Join(", ", missingAttributes)}, this method will not be used");
+                return;
+            } 
+            if (!hadPremonitionAttribute)
+            {
                 return;
             }
             

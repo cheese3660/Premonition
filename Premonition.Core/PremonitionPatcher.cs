@@ -197,12 +197,12 @@ public class PremonitionPatcher(
         foreach (var argument in patchMethod.Parameters)
         {
             var argumentInModule = patchMethodInModule.Parameters[argIndex];
+            // ReSharper disable once ConvertIfStatementToSwitchStatement
             if (argument.Name == "__instance")
             {
                 argumentIndices.Add(0);
             }
-
-            if (argument.Name == "__retVal")
+            else if (argument.Name == "__retVal")
             {
                 if (!argument.IsOut)
                 {
@@ -234,7 +234,7 @@ public class PremonitionPatcher(
                 {
                     if (methodBeingPatched.Parameters[i].Name != argument.Name) continue;
                     found = true;
-                    argumentIndices.Add(i);
+                    argumentIndices.Add(methodBeingPatched.IsStatic ? i : i+1);
                     break;
                 }
                 if (found) continue;
@@ -587,7 +587,7 @@ public class PremonitionPatcher(
                     {
                         if (methodBeingPatched.Parameters[i].Name != argument.Name) continue;
                         found = true;
-                        argumentIndices.Add(i);
+                        argumentIndices.Add(methodBeingPatched.IsStatic ? i : i+1);
                         break;
                     }
                     if (found) continue;
@@ -680,7 +680,7 @@ public class PremonitionPatcher(
                     {
                         if (methodBeingPatched.Parameters[i].Name != argument.Name) continue;
                         found = true;
-                        argumentIndices.Add(i);
+                        argumentIndices.Add(methodBeingPatched.IsStatic ? i : i+1);
                         break;
                     }
                     if (found) continue;
@@ -762,7 +762,7 @@ public class PremonitionPatcher(
                 {
                     if (methodBeingPatched.Parameters[i].Name != argument.Name) continue;
                     found = true;
-                    argumentIndices.Add(i);
+                    argumentIndices.Add(methodBeingPatched.IsStatic ? i : i+1);
                     break;
                 }
                 if (found) continue;
