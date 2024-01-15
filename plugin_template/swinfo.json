@@ -5,7 +5,7 @@
     "name": "Premonition",
     "description": "A library for simplifying preload patches",
     "source": "https://github.com/cheese3660/Premonition",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "version_check": "https://raw.githubusercontent.com/cheese3660/Premonition/main/plugin_template/swinfo.json",
     "ksp2_version": {
         "min": "0.2.0",
