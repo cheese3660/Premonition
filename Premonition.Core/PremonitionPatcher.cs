@@ -197,12 +197,12 @@ public class PremonitionPatcher(
         foreach (var argument in patchMethod.Parameters)
         {
             var argumentInModule = patchMethodInModule.Parameters[argIndex];
+            // ReSharper disable once ConvertIfStatementToSwitchStatement
             if (argument.Name == "__instance")
             {
                 argumentIndices.Add(0);
             }
-
-            if (argument.Name == "__retVal")
+            else if (argument.Name == "__retVal")
             {
                 if (!argument.IsOut)
                 {
