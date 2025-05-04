@@ -243,14 +243,16 @@ public class PremonitionManager(IAssemblyResolver? resolver = null)
     /// Apply the active patchers to an assembly, removing any that are applied
     /// </summary>
     /// <param name="definition">The assembly to be modified</param>
-    public void Patch(AssemblyDefinition definition)
+    public bool Patch(AssemblyDefinition definition)
     {
+        bool patched = false;
         List<int> toRemove = [];
         for (var i = 0; i < PremonitionPatchers.Count; i++)
         {
             if (PremonitionPatchers[i].Patch(definition))
             {
                 toRemove.Add(i);
+                patched = true;
             }
         }
 
@@ -259,5 +261,6 @@ public class PremonitionManager(IAssemblyResolver? resolver = null)
         {
             PremonitionPatchers.RemoveAt(index);
         }
+        return patched;
     }
 }
